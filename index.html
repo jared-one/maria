@@ -20,6 +20,126 @@
             position: relative;
         }
 
+        /* Entry Overlay */
+        .entry-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(ellipse at center, #1b2735 0%, #090a0f 100%);
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: opacity 2s ease-out, transform 2s ease-out;
+        }
+
+        .entry-overlay.hidden {
+            opacity: 0;
+            transform: scale(1.1);
+            pointer-events: none;
+        }
+
+        .entry-content {
+            text-align: center;
+            animation: float-entry 3s ease-in-out infinite;
+        }
+
+        @keyframes float-entry {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+
+        .entry-title {
+            font-size: 2em;
+            margin-bottom: 20px;
+            background: linear-gradient(45deg, #fff, #b794f6, #9f7aea);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: pulse-glow 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse-glow {
+            0%, 100% { 
+                filter: brightness(1);
+                text-shadow: 0 0 20px rgba(183, 148, 246, 0.5);
+            }
+            50% { 
+                filter: brightness(1.2);
+                text-shadow: 0 0 40px rgba(183, 148, 246, 0.8);
+            }
+        }
+
+        .entry-subtitle {
+            font-size: 1.2em;
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 40px;
+            font-style: italic;
+        }
+
+        .enter-button {
+            padding: 15px 40px;
+            font-size: 1.1em;
+            background: linear-gradient(135deg, rgba(183, 148, 246, 0.1), rgba(159, 122, 234, 0.1));
+            border: 2px solid rgba(183, 148, 246, 0.3);
+            color: #fff;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .enter-button::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: radial-gradient(circle, rgba(183, 148, 246, 0.3), transparent);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .enter-button:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .enter-button:hover {
+            transform: scale(1.05);
+            border-color: rgba(183, 148, 246, 0.6);
+            box-shadow: 0 0 30px rgba(183, 148, 246, 0.4);
+        }
+
+        .entry-stars {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+        }
+
+        .entry-star {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: white;
+            border-radius: 50%;
+            animation: twinkle-entry 2s infinite;
+        }
+
+        @keyframes twinkle-entry {
+            0%, 100% { opacity: 0; }
+            50% { opacity: 1; }
+        }
+
         /* Cosmic Background */
         .cosmos {
             position: fixed;
@@ -93,6 +213,12 @@
             padding: 40px 20px;
             position: relative;
             z-index: 10;
+            opacity: 0;
+            transition: opacity 2s ease-in;
+        }
+
+        .container.visible {
+            opacity: 1;
         }
 
         /* Header */
@@ -131,11 +257,41 @@
             font-style: italic;
         }
 
+        .audio-visual {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 3px;
+            height: 30px;
+            margin: 15px 0;
+        }
+
+        .audio-bar {
+            width: 3px;
+            background: linear-gradient(to top, #b794f6, #9f7aea);
+            border-radius: 3px;
+            animation: audio-wave 1s ease-in-out infinite;
+        }
+
+        .audio-bar:nth-child(1) { animation-delay: 0s; height: 10px; }
+        .audio-bar:nth-child(2) { animation-delay: 0.1s; height: 20px; }
+        .audio-bar:nth-child(3) { animation-delay: 0.2s; height: 15px; }
+        .audio-bar:nth-child(4) { animation-delay: 0.3s; height: 25px; }
+        .audio-bar:nth-child(5) { animation-delay: 0.4s; height: 18px; }
+        .audio-bar:nth-child(6) { animation-delay: 0.5s; height: 22px; }
+        .audio-bar:nth-child(7) { animation-delay: 0.6s; height: 12px; }
+
+        @keyframes audio-wave {
+            0%, 100% { transform: scaleY(1); }
+            50% { transform: scaleY(1.5); }
+        }
+
         audio {
             width: 100%;
             max-width: 400px;
             filter: invert(1);
             opacity: 0.8;
+            display: none;
         }
 
         /* Memory Images */
@@ -256,6 +412,7 @@
         .letter p:nth-child(5) { animation-delay: 1.3s; }
         .letter p:nth-child(6) { animation-delay: 1.5s; }
         .letter p:nth-child(7) { animation-delay: 1.7s; }
+        .letter p:nth-child(8) { animation-delay: 1.9s; }
 
         /* Thank You */
         .thank-you {
@@ -301,10 +458,21 @@
             h1 { font-size: 1.8em; }
             .letter { padding: 25px; }
             .memory { width: 200px; height: 150px; }
+            .entry-title { font-size: 1.5em; }
         }
     </style>
 </head>
 <body>
+    <!-- Entry Overlay -->
+    <div class="entry-overlay" id="entryOverlay">
+        <div class="entry-stars" id="entryStars"></div>
+        <div class="entry-content">
+            <h2 class="entry-title">A Journey Through the Stars</h2>
+            <p class="entry-subtitle">One last dance among the cosmos</p>
+            <button class="enter-button">Enter & Listen</button>
+        </div>
+    </div>
+
     <!-- Cosmic Background -->
     <div class="cosmos" id="cosmos"></div>
     
@@ -316,13 +484,22 @@
         <line class="constellation-line" x1="85%" y1="70%" x2="90%" y2="45%" stroke-dasharray="1000"/>
     </svg>
 
-    <div class="container">
+    <div class="container" id="mainContainer">
         <h1>A Farewell to the One I So Loved and Will Love Until the Very End</h1>
         
         <!-- Audio Player -->
         <div class="audio-container">
             <span class="audio-label">♪ Pisces - Tony Ann (Piano Cover) ♪</span>
-            <audio controls loop>
+            <div class="audio-visual">
+                <div class="audio-bar"></div>
+                <div class="audio-bar"></div>
+                <div class="audio-bar"></div>
+                <div class="audio-bar"></div>
+                <div class="audio-bar"></div>
+                <div class="audio-bar"></div>
+                <div class="audio-bar"></div>
+            </div>
+            <audio id="bgMusic" loop>
                 <source src="Pisces - Tony Ann (Piano Cover).mp3" type="audio/mpeg">
                 Your browser does not support the audio element.
             </audio>
@@ -368,6 +545,19 @@
     </div>
 
     <script>
+        // Create entry stars
+        function createEntryStars() {
+            const entryStars = document.getElementById('entryStars');
+            for (let i = 0; i < 50; i++) {
+                const star = document.createElement('div');
+                star.className = 'entry-star';
+                star.style.left = Math.random() * 100 + '%';
+                star.style.top = Math.random() * 100 + '%';
+                star.style.animationDelay = Math.random() * 2 + 's';
+                entryStars.appendChild(star);
+            }
+        }
+
         // Create floating stars
         function createStars() {
             const cosmos = document.getElementById('cosmos');
@@ -412,8 +602,9 @@
             cosmos.appendChild(nebula);
         }
 
-        // Initialize cosmic effects
+        // Initialize
         window.addEventListener('load', () => {
+            createEntryStars();
             createStars();
             
             // Create multiple nebulae
@@ -421,8 +612,30 @@
                 createNebula();
             }
             
-            // Periodically create shooting stars
-            setInterval(createShootingStar, 4000);
+            // Handle entry click
+            const entryOverlay = document.getElementById('entryOverlay');
+            const mainContainer = document.getElementById('mainContainer');
+            const bgMusic = document.getElementById('bgMusic');
+            
+            entryOverlay.addEventListener('click', () => {
+                // Start playing music
+                bgMusic.play().then(() => {
+                    console.log('Music started playing');
+                }).catch(e => {
+                    console.log('Audio play failed:', e);
+                });
+                
+                // Hide overlay
+                entryOverlay.classList.add('hidden');
+                
+                // Show main content
+                setTimeout(() => {
+                    mainContainer.classList.add('visible');
+                }, 500);
+                
+                // Start shooting stars after entry
+                setInterval(createShootingStar, 4000);
+            });
             
             // Add parallax effect on mouse move
             document.addEventListener('mousemove', (e) => {
@@ -436,14 +649,6 @@
                 });
             });
         });
-
-        // Auto-play audio with user interaction
-        document.addEventListener('click', function() {
-            const audio = document.querySelector('audio');
-            if (audio && audio.paused) {
-                audio.play().catch(e => console.log('Audio play failed:', e));
-            }
-        }, { once: true });
     </script>
 </body>
 </html>
