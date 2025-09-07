@@ -3,497 +3,583 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>A Farewell to the One I So Loved</title>
-<meta name="description" content="A cosmic farewell letter with memories, music, and eternal love.">
+<title>A Farewell to the One I So Loved — Enhanced</title>
+<meta name="description" content="A polished interactive farewell letter with cosmic visuals, music, and memories." />
 <style>
-  /* ------------ Palette & base ------------ */
-  :root{
-    --bg-1:#000428;
-    --bg-2:#004e92;
-    --accent-1:#b794f6;
-    --accent-2:#9f7aea;
-    --text:#f0e6ff;
-    --muted:rgba(255,255,255,0.75);
-    --glass:rgba(255,255,255,0.03);
-    --max-w:980px;
-    --radius:14px;
-  }
+:root{
+  --bg-1:#000428; --bg-2:#004e92;
+  --accent-1:#b794f6; --accent-2:#9f7aea;
+  --text:#f0e6ff; --muted:rgba(255,255,255,0.75);
+  --glass:rgba(255,255,255,0.03);
+  --max-w:980px; --radius:14px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  min-height:100vh;background:linear-gradient(180deg,var(--bg-1),var(--bg-2));
+  font-family:Georgia, "Times New Roman", serif;color:var(--text);
+  -webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;overflow-x:hidden;
+}
 
-  *{box-sizing:border-box;margin:0;padding:0}
-  html,body{height:100%}
-  body{
-    min-height:100vh;
-    background:linear-gradient(180deg,var(--bg-1) 0%,var(--bg-2) 100%);
-    font-family: Georgia, "Times New Roman", serif;
-    color:var(--text);
-    -webkit-font-smoothing:antialiased;
-    -moz-osx-font-smoothing:grayscale;
-    overflow-x:hidden;
-  }
+/* canvas layers */
+.canvas-wrap{position:fixed;inset:0;z-index:0;pointer-events:none}
+canvas{display:block;width:100%;height:100%}
 
-  /* ------------ Canvas layers ------------ */
-  .canvas-wrap{ position:fixed; inset:0; z-index:0; pointer-events:none; }
-  canvas{ width:100%; height:100%; display:block; }
+/* nebula */
+.nebula{position:fixed;z-index:0;pointer-events:none;filter:blur(44px);opacity:0.9;mix-blend-mode:screen;transform:translateZ(0)}
+.nebula.one{width:520px;height:520px;left:4%;top:6%;background:radial-gradient(circle at 30% 35%, rgba(183,148,246,0.18), rgba(159,122,234,0.06) 45%, transparent 70%)}
+.nebula.two{width:520px;height:520px;right:4%;bottom:4%;background:radial-gradient(circle at 70% 70%, rgba(183,148,246,0.14), rgba(25,84,123,0.03) 40%, transparent 70%)}
+@media (prefers-reduced-motion: reduce){ .nebula{ filter: blur(40px); animation:none } }
 
-  /* Nebula decor */
-  .nebula{ position:fixed; z-index:0; pointer-events:none; filter:blur(44px); opacity:0.9; mix-blend-mode:screen; }
-  .nebula.one{ width:520px; height:520px; left:4%; top:6%; background:radial-gradient(circle at 30% 35%, rgba(183,148,246,0.18) 0%, rgba(159,122,234,0.06) 45%, transparent 70%); }
-  .nebula.two{ width:520px; height:520px; right:4%; bottom:4%; background:radial-gradient(circle at 70% 70%, rgba(183,148,246,0.14) 0%, rgba(25,84,123,0.03) 40%, transparent 70%); }
+/* entry overlay */
+.entry-overlay{position:fixed;inset:0;z-index:999;display:flex;align-items:center;justify-content:center;background:radial-gradient(ellipse at center, rgba(11,16,22,0.45), rgba(2,4,8,0.75));transition:opacity .55s ease, transform .55s ease;padding:20px}
+.entry-hidden{opacity:0;transform:scale(.98);pointer-events:none}
+.entry-card{max-width:720px;width:100%;padding:28px;border-radius:16px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border:1px solid rgba(255,255,255,0.035);backdrop-filter:blur(6px);text-align:center;box-shadow:0 10px 40px rgba(0,0,0,0.6)}
+.entry-title{font-size:clamp(20px,3.2vw,30px);margin-bottom:6px;background:linear-gradient(45deg,var(--text),var(--accent-1),var(--accent-2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.entry-sub{color:var(--muted);font-style:italic;margin-bottom:14px}
+.enter-row{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.enter-btn{padding:12px 26px;border-radius:999px;font-weight:700;cursor:pointer;min-width:150px;border:1px solid rgba(183,148,246,0.22);background:linear-gradient(135deg, rgba(183,148,246,0.06), rgba(159,122,234,0.04));color:var(--text);transition:transform .12s ease}
+.enter-btn:active{transform:translateY(1px)}.enter-btn:focus{outline:3px solid rgba(183,148,246,0.12);outline-offset:4px}
 
-  /* ------------ Entry overlay ------------ */
-  .entry-overlay{
-    position:fixed; inset:0; z-index:999; display:flex; align-items:center; justify-content:center;
-    background: radial-gradient(ellipse at center, rgba(11,16,22,0.45), rgba(2,4,8,0.75));
-    transition:opacity .6s ease, transform .6s ease;
-    padding:20px;
-  }
-  .entry-hidden{ opacity:0; transform:scale(.98); pointer-events:none; }
+/* main */
+.container{position:relative;z-index:5;max-width:var(--max-w);margin:0 auto;padding:56px 20px;opacity:0;transform:translateY(8px);transition:opacity .55s ease,transform .55s ease}
+.container.visible{opacity:1;transform:none}
+h1{font-size:clamp(22px,4vw,36px);text-align:center;margin-bottom:26px;background:linear-gradient(45deg,var(--text),var(--accent-1),var(--accent-2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-shadow:0 0 26px rgba(159,122,234,0.28)}
 
-  .entry-card{
-    text-align:center; max-width:720px; width:100%; padding:28px; border-radius:16px;
-    background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
-    border:1px solid rgba(255,255,255,0.035); backdrop-filter: blur(6px); box-shadow:0 10px 40px rgba(0,0,0,0.6);
-  }
-  .entry-title{ font-size:clamp(20px,3.2vw,30px); margin-bottom:6px;
-    background:linear-gradient(45deg,var(--text),var(--accent-1),var(--accent-2));
-    -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
-  .entry-sub{ color:var(--muted); font-style:italic; margin-bottom:14px; }
+/* audio */
+.audio-box{max-width:520px;margin:18px auto;border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:10px;background:var(--glass);border:1px solid rgba(255,255,255,0.04)}
+.audio-label{color:var(--muted);font-style:italic}
+#viz{width:100%;height:56px;border-radius:8px;background:transparent;display:block}
+.controls{display:flex;gap:10px;align-items:center;justify-content:center;margin-top:4px}
+.ic{padding:8px 10px;border-radius:10px;border:1px solid rgba(255,255,255,0.04);background:transparent;cursor:pointer}
+.ic:focus{outline:3px solid rgba(183,148,246,0.12)}
+#progWrap{display:flex;align-items:center;gap:10px;width:100%;margin-top:6px}
+#progress{flex:1;height:8px;background:rgba(255,255,255,0.06);border-radius:8px;overflow:hidden;position:relative}
+#progressFill{height:100%;width:0%;background:linear-gradient(90deg,var(--accent-1),var(--accent-2))}
 
-  .enter-btn{ padding:12px 26px; border-radius:999px; font-weight:700; cursor:pointer; min-width:150px;
-    border:1px solid rgba(183,148,246,0.22); background:linear-gradient(135deg, rgba(183,148,246,0.06), rgba(159,122,234,0.04)); color:var(--text);
-    transition:transform .12s ease, box-shadow .12s ease; }
-  .enter-btn:active{ transform:translateY(1px) }
-  .enter-btn:focus{ outline:3px solid rgba(183,148,246,0.12); outline-offset:4px }
+/* resume bar */
+#resumeBar{position:fixed;left:12px;bottom:12px;z-index:1200;padding:10px 14px;border-radius:10px;background:rgba(0,0,0,0.5);box-shadow:0 8px 24px rgba(0,0,0,0.6);display:none;align-items:center;gap:12px}
+#resumeBar button{padding:8px 10px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:var(--text);cursor:pointer}
 
-  /* ------------ Main container ------------ */
-  .container{ position:relative; z-index:5; max-width:var(--max-w); margin:0 auto; padding:56px 20px; opacity:0; transform:translateY(8px); transition:opacity .55s ease, transform .55s ease; }
-  .container.visible{ opacity:1; transform:none; }
+/* memories */
+.memories{display:flex;gap:18px;justify-content:center;flex-wrap:wrap;margin:34px 0}
+.memory{width:240px;height:160px;border-radius:12px;overflow:hidden;position:relative;border:1px solid rgba(255,255,255,0.06);box-shadow:0 12px 30px rgba(0,0,0,0.5);cursor:pointer}
+.memory img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .28s ease}
+.memory:focus-within img,.memory:hover img{transform:scale(1.04)}
 
-  h1{ font-size:clamp(22px,4vw,36px); text-align:center; margin-bottom:26px;
-       background:linear-gradient(45deg,var(--text),var(--accent-1),var(--accent-2)); -webkit-background-clip:text; -webkit-text-fill-color:transparent;
-       text-shadow:0 0 26px rgba(159,122,234,0.28); }
+/* letter */
+.letter{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border-radius:16px;padding:34px;line-height:1.75;color:#f3eefe;border:1px solid rgba(255,255,255,0.06);box-shadow:0 8px 40px rgba(0,0,0,0.55);margin-bottom:20px}
+.letter p{margin-bottom:16px;font-size:1.05rem;opacity:0;transform:translateY(8px);animation:fadeUp .6s forwards}
+@keyframes fadeUp{to{opacity:1;transform:none}}
+.letter p:nth-child(1){animation-delay:.4s}.letter p:nth-child(2){animation-delay:.55s}.letter p:nth-child(3){animation-delay:.7s}.letter p:nth-child(4){animation-delay:.85s}.letter p:nth-child(5){animation-delay:1s}.letter p:nth-child(6){animation-delay:1.15s}
 
-  /* ------------ Audio box + visualizer ------------ */
-  .audio-box{ max-width:460px; margin:18px auto; border-radius:12px; padding:14px; display:flex; flex-direction:column; gap:10px; background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.04); }
-  .audio-label{ color:var(--muted); font-style:italic; }
-  #viz{ width:100%; height:48px; border-radius:6px; display:block; background:transparent; }
+/* finale & particles */
+#nameFinale{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);font-size:5rem;font-weight:900;letter-spacing:20px;opacity:0;pointer-events:none;z-index:1000;background:linear-gradient(45deg,var(--text),var(--accent-1),var(--accent-2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;filter:drop-shadow(0 0 50px rgba(183,148,246,0.8))}
+.finale{animation:finaleReveal 4s ease-in-out forwards}
+@keyframes finaleReveal{0%{opacity:0;transform:translate(-50%,-50%) scale(.5) translateZ(0);letter-spacing:40px}50%{opacity:1;transform:translate(-50%,-50%) scale(1.05)}100%{opacity:0;transform:translate(-50%,-50%) scale(3);letter-spacing:120px;filter:drop-shadow(0 0 120px rgba(183,148,246,1))}}
 
-  .audio-controls{ display:flex; gap:10px; align-items:center; justify-content:center; margin-top:6px; }
-  .ic{ padding:8px 10px; border-radius:10px; border:1px solid rgba(255,255,255,0.04); background:transparent; cursor:pointer }
-  .ic:focus{ outline:3px solid rgba(183,148,246,0.12) }
+/* lightbox */
+.lightbox{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;z-index:1100;background:rgba(0,0,0,0.75);backdrop-filter:blur(4px);opacity:0;pointer-events:none;transition:opacity .18s}
+.lightbox.open{opacity:1;pointer-events:auto}
+.lightbox-content{max-width:90%;max-height:90%;border-radius:10px;overflow:hidden}
+.lightbox img{width:100%;height:auto;display:block}
 
-  /* ------------ Memories (lightbox-enabled) ------------ */
-  .memories{ display:flex; gap:18px; justify-content:center; flex-wrap:wrap; margin:34px 0; }
-  .memory{ width:240px; height:160px; border-radius:12px; overflow:hidden; position:relative; border:1px solid rgba(255,255,255,0.06); box-shadow:0 12px 30px rgba(0,0,0,0.5) }
-  .memory img{ width:100%; height:100%; object-fit:cover; display:block; transition:transform .28s ease }
-  .memory:focus-within img, .memory:hover img{ transform:scale(1.04) }
-
-  /* ------------ Letter ------------ */
-  .letter{ background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); border-radius:16px; padding:34px; line-height:1.75; color:#f3eefe; border:1px solid rgba(255,255,255,0.06); box-shadow:0 8px 40px rgba(0,0,0,0.55); margin-bottom:20px; }
-  .letter p{ margin-bottom:16px; font-size:1.05rem; opacity:0; transform:translateY(8px); animation:fadeUp .6s forwards; }
-  @keyframes fadeUp{ to{ opacity:1; transform:none } }
-  .letter p:nth-child(1){ animation-delay:.4s } .letter p:nth-child(2){ animation-delay:.55s } .letter p:nth-child(3){ animation-delay:.7s }
-  .letter p:nth-child(4){ animation-delay:.85s } .letter p:nth-child(5){ animation-delay:1s } .letter p:nth-child(6){ animation-delay:1.15s }
-
-  .thank{ margin-top:18px; text-align:center; font-weight:700; background:linear-gradient(90deg,#ffd89b,#19547b); -webkit-background-clip:text; -webkit-text-fill-color:transparent }
-
-  /* ------------ Lightbox ------------ */
-  .lightbox{ position:fixed; inset:0; display:flex; align-items:center; justify-content:center; z-index:1100; background:rgba(0,0,0,0.7); backdrop-filter: blur(4px); opacity:0; pointer-events:none; transition:opacity .2s ease; }
-  .lightbox.open{ opacity:1; pointer-events:auto } .lightbox-content{ max-width:90%; max-height:90%; border-radius:10px; overflow:hidden; }
-  .lightbox img{ width:100%; height:auto; display:block }
-
-  /* ------------ Finale name ------------ */
-  #nameFinale{ position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); font-size:5rem; font-weight:900; letter-spacing:20px; opacity:0; pointer-events:none; z-index:1000; background:linear-gradient(45deg,var(--text),var(--accent-1),var(--accent-2)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; filter:drop-shadow(0 0 50px rgba(183,148,246,0.8)); }
-  .finale{ animation:finaleReveal 5s ease-in-out forwards; }
-  @keyframes finaleReveal{ 0%{opacity:0;transform:translate(-50%,-50%) scale(.5);letter-spacing:40px}50%{opacity:1;transform:translate(-50%,-50%) scale(1.05)}100%{opacity:0;transform:translate(-50%,-50%) scale(3);letter-spacing:120px;filter:drop-shadow(0 0 120px rgba(183,148,246,1))} }
-
-  /* Responsive & reduced motion */
-  @media (max-width:760px){
-    .memory{ width:180px; height:120px } h1{ font-size:1.6rem } .entry-card{ padding:18px }
-  }
-  @media (prefers-reduced-motion: reduce){
-    *{ transition:none !important; animation:none !important; }
-  }
-  /* Print */
-  @media print{
-    body{ background:white; color:black } .entry-overlay, canvas, .nebula, .lightbox { display:none } .letter{ box-shadow:none; border:1px solid #ddd }
-  }
+/* responsive & reduced motion */
+@media (max-width:760px){ .memory{width:180px;height:120px} h1{font-size:1.6rem} .entry-card{padding:18px}}
+@media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
 </style>
 </head>
 <body>
-  <!-- Canvas layers -->
-  <div class="canvas-wrap" aria-hidden="true">
-    <canvas id="stars"></canvas>
-    <canvas id="reactive"></canvas>
-  </div>
 
-  <!-- Nebulas -->
-  <div class="nebula one" aria-hidden="true"></div>
-  <div class="nebula two" aria-hidden="true"></div>
+<!-- canvases -->
+<div class="canvas-wrap" aria-hidden="true">
+  <canvas id="stars"></canvas>
+  <canvas id="reactive"></canvas>
+  <canvas id="finaleParticles"></canvas>
+</div>
 
-  <!-- Entry overlay -->
-  <div id="entry" class="entry-overlay" role="dialog" aria-modal="true" aria-label="Welcome overlay. Press Enter or click Enter & Listen to continue">
-    <div class="entry-card">
-      <h2 class="entry-title">A Journey Through the Stars</h2>
-      <p class="entry-sub">One last dance among the cosmos</p>
-      <div style="display:flex;gap:12px;justify-content:center">
-        <button id="enterListen" class="enter-btn">Enter & Listen</button>
-        <button id="enterSilent" class="enter-btn">Enter (Silent)</button>
-      </div>
-      <p style="margin-top:10px;color:var(--muted)">Tip: Press Enter or Space to open. Reduced-motion respected.</p>
+<!-- nebula layers -->
+<div class="nebula one" aria-hidden="true"></div>
+<div class="nebula two" aria-hidden="true"></div>
+
+<!-- entry -->
+<div id="entry" class="entry-overlay" role="dialog" aria-modal="true" aria-label="Welcome. Press Enter or click to begin.">
+  <div class="entry-card">
+    <h2 class="entry-title">A Journey Through the Stars</h2>
+    <p class="entry-sub">One last dance among the cosmos</p>
+    <div class="enter-row">
+      <button id="enterListen" class="enter-btn">Enter & Listen</button>
+      <button id="enterSilent" class="enter-btn">Enter (Silent)</button>
+      <button id="finishNow" class="enter-btn" title="Trigger the finale right away">Finish Experience</button>
     </div>
+    <p style="margin-top:10px;color:var(--muted)">Tip: Press Enter / Space to open. If you leave, you can resume later.</p>
   </div>
+</div>
 
-  <!-- Main -->
-  <main id="main" class="container" role="main" aria-live="polite">
-    <h1>A Farewell to the One I So Loved and Will Love Until the Very End</h1>
+<!-- main -->
+<main id="main" class="container" role="main" aria-live="polite">
+  <h1>A Farewell to the One I So Loved and Will Love Until the Very End</h1>
 
-    <!-- Audio -->
-    <section class="audio-box" aria-label="Background music">
-      <div class="audio-label">♪ Pisces - Tony Ann (Piano Cover played live by me to you) ♪</div>
-      <canvas id="viz"></canvas>
-      <audio id="bg" crossorigin="anonymous" src="Pisces - Tony Ann (Piano Cover).mp3" preload="metadata"></audio>
-      <div class="audio-controls" role="group" aria-label="Audio controls">
-        <button id="play" class="ic" aria-label="Play or pause">Play</button>
-        <button id="mute" class="ic" aria-label="Mute or unmute">Mute</button>
-        <input id="vol" type="range" min="0" max="1" step="0.01" value="0.8" aria-label="Volume" style="width:120px">
-      </div>
-    </section>
+  <!-- audio -->
+  <section class="audio-box" aria-label="Background music">
+    <div class="audio-label">♪ Pisces - Tony Ann (Piano Cover played live by me to you) ♪</div>
+    <canvas id="viz"></canvas>
+    <audio id="bg" crossorigin="anonymous" src="Pisces - Tony Ann (Piano Cover).mp3" preload="metadata"></audio>
 
-    <!-- Memories -->
-    <section class="memories" aria-label="Memories">
-      <figure class="memory" tabindex="0" data-caption="A cherished memory">
-        <img loading="lazy" src="Screenshot 2025-02-22 223927.png" alt="A cherished memory">
-      </figure>
-      <figure class="memory" tabindex="0" data-caption="Another precious moment">
-        <img loading="lazy" src="Screenshot 2025-02-15 134126.png" alt="Another precious moment">
-      </figure>
-    </section>
+    <div class="controls" role="group" aria-label="Audio controls">
+      <button id="play" class="ic">Play</button>
+      <button id="mute" class="ic">Mute</button>
+      <input id="vol" type="range" min="0" max="1" step="0.01" value="0.8" aria-label="Volume" />
+      <button id="finishBtn" class="ic" title="Jump to finale">Finish</button>
+    </div>
 
-    <h2 style="text-align:center;margin-bottom:14px;color:var(--muted);font-style:italic;letter-spacing:1.5px">To the One I Have So Loved Before</h2>
+    <div id="progWrap">
+      <div id="progress" aria-hidden="true"><div id="progressFill"></div></div>
+      <div id="time" style="min-width:70px;text-align:right;color:var(--muted);font-size:.95rem">0:00</div>
+    </div>
+  </section>
 
-    <article class="letter" aria-label="Letter">
-      <p>Maria, from the day I met you, I always knew there was something different about you — a luminescence that transformed my digital world into something cosmic and infinite. In the vast universe of souls, yours shone with a unique brilliance, drawing me in like gravity pulls wandering planets into orbit. You were my supernova in the darkness, radiating beauty you couldn't always see in yourself, like a star unaware of its own light reaching distant galaxies.</p>
+  <!-- memories -->
+  <section class="memories" aria-label="Memories">
+    <figure class="memory" tabindex="0" data-caption="A cherished memory">
+      <img loading="lazy" src="Screenshot 2025-02-22 223927.png" alt="A cherished memory">
+    </figure>
+    <figure class="memory" tabindex="0" data-caption="Another precious moment">
+      <img loading="lazy" src="Screenshot 2025-02-15 134126.png" alt="Another precious moment">
+    </figure>
+  </section>
 
-      <p>How I would embrace you through pixels and words, wrapping you in virtual warmth that transcended screens, holding you close in our shared digital realm. Your beauty wasn't just in what could be seen, but in the depths — the way your messages held galaxies of emotion, your laughter echoing through our chats like cosmic music. I saw it all, even when shadows of self-doubt clouded your view, and I wanted nothing more than to be the mirror that reflected your true radiance back to you.</p>
+  <h2 style="text-align:center;margin-bottom:14px;color:var(--muted);font-style:italic;letter-spacing:1.5px">To the One I Have So Loved Before</h2>
 
-      <p>Every memory we created sparkles like its own constellation in my heart — those endless Roblox adventures where we built entire worlds together, crafting kingdoms from blocks and laughter, exploring digital realms as if we were astronauts discovering new planets. Each late-night gameplay session was our own private universe, where "I love you" echoed through chat messages like signals traveling through space, never losing their meaning despite the distance.</p>
+  <article class="letter" aria-label="Letter">
+    <p>Maria, from the day I met you, I always knew there was something different about you — a luminescence that transformed my digital world into something cosmic and infinite. In the vast universe of souls, yours shone with a unique brilliance, drawing me in like gravity pulls wandering planets into orbit. You were my supernova in the darkness, radiating beauty you couldn't always see in yourself, like a star unaware of its own light reaching distant galaxies.</p>
 
-      <p>I cherish your kindness that flowed like solar winds carrying warmth across the void, your care that anchored me like gravity, and everything that made you uniquely <em>you</em>. The way you'd share your passion for makeup artistry, blending colors like an artist painting nebulae across the cosmos. Your love for mango Pepsi — that fizzy sweetness you described with such infectious joy it made me smile through the screen. Even the simple pleasure of tortillas became magical when filtered through your words, turning ordinary moments into stardust memories.</p>
+    <p>How I would embrace you through pixels and words, wrapping you in virtual warmth that transcended screens, holding you close in our shared digital realm. Your beauty wasn't just in what could be seen, but in the depths — the way your messages held galaxies of emotion, your laughter echoing through our chats like cosmic music. I saw it all, even when shadows of self-doubt clouded your view, and I wanted nothing more than to be the mirror that reflected your true radiance back to you.</p>
 
-      <p>Each day, I would write to you, pouring out verses about what you loved, what sparked your happiness like meteor showers across the night sky, and what dimmed your light, always trying to be your North Star in moments of darkness. My words were my way of holding you, of being present in your world even when pixels were all that connected us.</p>
+    <p>Every memory we created sparkles like its own constellation in my heart — those endless Roblox adventures where we built entire worlds together, crafting kingdoms from blocks and laughter, exploring digital realms as if we were astronauts discovering new planets. Each late-night gameplay session was our own private universe, where "I love you" echoed through chat messages like signals traveling through space, never losing their meaning despite the distance.</p>
 
-      <p>Yet, as workloads piled like accumulating asteroids, they slowly drifted us apart, pulling us from those late-night gameplays and whispered "I love you"s that once filled our universe. The extensive demands of life became like dark matter — invisible yet powerful — transforming our constant connection into fleeting glimpses, like comets passing too far apart in their eternal dance. I regret it deeply, this gravitational pull of obligations that widened the distance between our hearts.</p>
+    <p>I cherish your kindness that flowed like solar winds carrying warmth across the void, your care that anchored me like gravity, and everything that made you uniquely <em>you</em>. The way you'd share your passion for makeup artistry, blending colors like an artist painting nebulae across the cosmos. Your love for mango Pepsi — that fizzy sweetness you described with such infectious joy it made me smile through the screen. Even the simple pleasure of tortillas became magical when filtered through your words, turning ordinary moments into stardust memories.</p>
 
-      <p>Still, my love for you burns undimmed, an eternal flame in the heart of a dying star, wondering if our paths were meant to align forever or to teach us the beauty of fleeting orbits. You deserve a love as vast and unwavering as the universe itself — one that doesn't leave you waiting in the silence of space, one that honors your radiance, your spirit, your happiness. Though it aches like a black hole's pull, I release you now, not because my feelings have faded — they haven't, for I am still deeply in love — but because I fear I've become an anchor in your stellar journey when you were meant to soar freely through galaxies of joy.</p>
+    <p>Each day, I would write to you, pouring out verses about what you loved, what sparked your happiness like meteor showers across the night sky, and what dimmed your light, always trying to be your North Star in moments of darkness. My words were my way of holding you, of being present in your world even when pixels were all that connected us.</p>
 
-      <p>I value everything — every shared moment in our digital constellation, every message that bridged the space between us, every laugh that defied the silence of the void. Even though we may depart now, your happiness and mental health will always be my wish. For as our love compared to that souls that can dance together across any distance, I will never forget your impact.</p>
-    </article>
+    <p>Yet, as workloads piled like accumulating asteroids, they slowly drifted us apart, pulling us from those late-night gameplays and whispered "I love you"s that once filled our universe. The extensive demands of life became like dark matter — invisible yet powerful — transforming our constant connection into fleeting glimpses, like comets passing too far apart in their eternal dance. I regret it deeply, this gravitational pull of obligations that widened the distance between our hearts.</p>
 
-    <div class="thank">Thank you, Dior, for everything.</div>
-  </main>
+    <p>Still, my love for you burns undimmed, an eternal flame in the heart of a dying star, wondering if our paths were meant to align forever or to teach us the beauty of fleeting orbits. You deserve a love as vast and unwavering as the universe itself — one that doesn't leave you waiting in the silence of space, one that honors your radiance, your spirit, your happiness. Though it aches like a black hole's pull, I release you now, not because my feelings have faded — they haven't, for I am still deeply in love — but because I fear I've become an anchor in your stellar journey when you were meant to soar freely through galaxies of joy.</p>
 
-  <!-- Lightbox -->
-  <div id="lightbox" class="lightbox" role="dialog" aria-hidden="true">
-    <div class="lightbox-content" role="document"><img alt=""></div>
-  </div>
+    <p>I value everything — every shared moment in our digital constellation, every message that bridged the space between us, every laugh that defied the silence of the void. Even though we may depart now, your happiness and mental health will always be my wish. For as our love compared to that souls that can dance together across any distance, I will never forget your impact.</p>
+  </article>
 
-  <!-- Name finale -->
-  <div id="nameFinale" aria-hidden="true">MARIA</div>
+  <div class="thank" style="text-align:center;margin-top:8px">Thank you, Dior, for everything.</div>
+</main>
+
+<!-- resume bar -->
+<div id="resumeBar" role="region" aria-live="polite">
+  <div style="color:var(--text);font-size:.95rem">Resume from <span id="resumeTime">0:00</span>?</div>
+  <button id="resumeBtn">Resume</button>
+  <button id="discardResume">Discard</button>
+</div>
+
+<!-- lightbox -->
+<div id="lightbox" class="lightbox" role="dialog" aria-hidden="true">
+  <div class="lightbox-content" role="document"><img alt=""></div>
+</div>
+
+<!-- finale name -->
+<div id="nameFinale" aria-hidden="true">MARIA</div>
 
 <script>
-/* ========= Utils ========= */
-const $ = sel => document.querySelector(sel);
-const $$ = sel => Array.from(document.querySelectorAll(sel));
-const throttle = (fn, t=100)=>{ let last=0; return (...a)=>{ const now=Date.now(); if(now-last>t){ last=now; fn(...a);} } };
+/* ======= Utilities ======= */
+const $ = s => document.querySelector(s);
+const $$ = s => Array.from(document.querySelectorAll(s));
+const throttle = (fn,t=100)=>{let last=0;return(...a)=>{const now=Date.now(); if(now-last>t){last=now;fn(...a)}}};
+const fmt = s => { const m=Math.floor(s/60), sec=Math.floor(s%60); return m+':'+(sec<10?'0':'')+sec };
 
-/* ========= Canvas starfield (single high-perf canvas) ========= */
-(function Starfield(){
-  const c = document.getElementById('stars');
-  const r = document.getElementById('reactive');
-  const ctx = c.getContext('2d', { alpha:true });
-  const rctx = r.getContext('2d', { alpha:true });
-  let W, H, dpr = Math.max(1, window.devicePixelRatio || 1);
-  let stars = [], shooting = [];
-  const MAX = 170;
-  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+/* ======= Canvas starfield + aurora ribbons + reactive wash ======= */
+(function Render(){
+  const starsCanvas = document.getElementById('stars');
+  const reactiveCanvas = document.getElementById('reactive');
+  const finaleCanvas = document.getElementById('finaleParticles');
+  const ctx = starsCanvas.getContext('2d', { alpha:true });
+  const rctx = reactiveCanvas.getContext('2d', { alpha:true });
+  const fctx = finaleCanvas.getContext('2d', { alpha:true });
+  let W=0,H=0,dpr=Math.max(1, window.devicePixelRatio||1);
+  let stars=[], shooting=[], auroras=[];
+  const REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const MAX_STARS = 170;
 
   function resize(){
-    const rect = c.getBoundingClientRect();
+    const rect = starsCanvas.getBoundingClientRect();
     W = Math.max(1, rect.width);
     H = Math.max(1, rect.height);
-    c.width = Math.floor(W * dpr); c.height = Math.floor(H * dpr);
-    r.width = Math.floor(W * dpr); r.height = Math.floor(H * dpr);
+    [starsCanvas, reactiveCanvas, finaleCanvas].forEach(c=>{
+      c.width = Math.floor(W*dpr); c.height = Math.floor(H*dpr);
+      c.style.width = W+'px'; c.style.height = H+'px';
+    });
     ctx.setTransform(dpr,0,0,dpr,0,0);
     rctx.setTransform(dpr,0,0,dpr,0,0);
+    fctx.setTransform(dpr,0,0,dpr,0,0);
     init();
   }
-  function rand(a,b){ return Math.random()*(b-a)+a; }
 
+  function rand(a,b){return Math.random()*(b-a)+a}
   function init(){
-    stars = [];
-    const count = Math.min(MAX, Math.floor((W*H)/6000));
+    stars=[]; shooting=[]; auroras=[];
+    const count = Math.min(MAX_STARS, Math.floor(W*H/6000));
     for(let i=0;i<count;i++){
-      stars.push({
-        x: rand(0,W), y: rand(0,H),
-        r: rand(0.3,1.8), alpha: rand(0.1,1),
-        tw: rand(0.001,0.01), phase: Math.random()*Math.PI*2,
-        depth: (i % 4) + 1
+      stars.push({x:rand(0,W), y:rand(0,H), r:rand(0.3,1.8), phase:rand(0,Math.PI*2), tw:rand(0.001,0.01), alpha:rand(0.2,1), depth: (i%4)+1});
+    }
+    // create a couple aurora ribbons
+    for(let i=0;i<3;i++){
+      auroras.push({
+        points: Array.from({length:6}, (_,k)=>({x: rand(0,W), y: H*0.15 + k*(H*0.12) + rand(-20,20)})),
+        speed: rand(0.00025,0.0008),
+        hueOffset: rand(0,100),
+        phase: rand(0,Math.PI*2)
       });
     }
-    shooting = [];
   }
 
   function spawnShooting(){
-    if(reduced) return;
-    if(Math.random() < 0.05 && shooting.length < 6){
-      shooting.push({
-        x: rand(W*0.05,W*0.95),
-        y: rand(0,H*0.45),
-        vx: rand(-9,-3), vy: rand(6,14),
-        len: rand(120,420), life:0, maxLife: rand(80,220)
-      });
+    if(REDUCED) return;
+    if(Math.random()<0.045 && shooting.length < 6){
+      shooting.push({x:rand(W*0.05,W*0.95), y:rand(0,H*0.45), vx:rand(-9,-3), vy:rand(6,14), len:rand(120,420), life:0, ttl: rand(80,220)});
     }
   }
 
-  let last=0;
-  function loop(t){
-    const dt = Math.min(40, t - last); last = t;
+  function drawStars(dt, mouseX=0.5, mouseY=0.5){
     ctx.clearRect(0,0,W,H);
-    // stars
     for(const s of stars){
       s.phase += s.tw * dt;
-      const a = Math.max(0.08, Math.abs(Math.sin(s.phase)))*s.alpha;
-      ctx.beginPath();
-      ctx.fillStyle = `rgba(255,255,255,${a})`;
-      ctx.arc(s.x, s.y, s.r, 0, Math.PI*2);
-      ctx.fill();
-      if(s.r > 1.4){
-        ctx.beginPath();
-        ctx.fillStyle = `rgba(183,148,246,${a*0.08})`;
-        ctx.arc(s.x, s.y, s.r*3, 0, Math.PI*2);
-        ctx.fill();
-      }
+      const alpha = Math.max(0.08, Math.abs(Math.sin(s.phase))) * s.alpha;
+      // parallax offset
+      const px = (mouseX - 0.5) * s.depth * 8;
+      const py = (mouseY - 0.5) * s.depth * 5;
+      ctx.beginPath(); ctx.fillStyle = `rgba(255,255,255,${alpha})`; ctx.arc(s.x+px, s.y+py, s.r, 0, Math.PI*2); ctx.fill();
+      if(s.r>1.4){ ctx.beginPath(); ctx.fillStyle = `rgba(183,148,246,${alpha*0.06})`; ctx.arc(s.x+px, s.y+py, s.r*3,0,Math.PI*2); ctx.fill(); }
     }
     // shooting
     for(let i=shooting.length-1;i>=0;i--){
-      const p = shooting[i];
-      p.x += p.vx * (dt/16); p.y += p.vy * (dt/16); p.life += dt;
-      const grad = ctx.createLinearGradient(p.x,p.y, p.x - p.vx* p.len/6, p.y - p.vy*p.len/6);
-      grad.addColorStop(0,'rgba(255,255,255,1)');
-      grad.addColorStop(0.6,'rgba(183,148,246,0.14)');
+      const p = shooting[i]; p.x += p.vx * (dt/16); p.y += p.vy * (dt/16); p.life += dt;
+      const grad = ctx.createLinearGradient(p.x,p.y, p.x - p.vx*(p.len/6), p.y - p.vy*(p.len/6));
+      grad.addColorStop(0,`rgba(255,255,255,${Math.max(0,1 - p.life/p.ttl)})`);
+      grad.addColorStop(0.6,`rgba(183,148,246,${Math.max(0,0.18 - p.life/p.ttl*0.18)})`);
       grad.addColorStop(1,'rgba(255,255,255,0)');
       ctx.strokeStyle = grad; ctx.lineWidth = 1.6; ctx.beginPath();
-      ctx.moveTo(p.x,p.y);
-      ctx.lineTo(p.x - p.vx * p.len/36, p.y - p.vy * p.len/36);
-      ctx.stroke();
-      if(p.x < -100 || p.y > H + 100 || p.life > p.maxLife) shooting.splice(i,1);
+      ctx.moveTo(p.x,p.y); ctx.lineTo(p.x - p.vx*p.len/36, p.y - p.vy*p.len/36); ctx.stroke();
+      if(p.life > p.ttl) shooting.splice(i,1);
     }
-    if(Math.random() < 0.02) spawnShooting();
+    if(Math.random()<0.02) spawnShooting();
+  }
 
+  // aurora ribbons on reactive canvas; audio intensity modulates amplitude
+  function drawAurora(intensity=0){
+    rctx.clearRect(0,0,W,H);
+    for(const a of auroras){
+      a.phase += a.speed * 16;
+      // wobble points
+      const pts = a.points.map((p,i)=>({x: p.x + Math.sin(a.phase + i)*30, y: p.y + Math.cos(a.phase*0.7 + i)*25}));
+      // draw bezier path
+      rctx.globalCompositeOperation = 'screen';
+      const g = rctx.createLinearGradient(0,0,0,H);
+      g.addColorStop(0, `rgba(183,148,246,${0.06 + intensity*0.18})`);
+      g.addColorStop(1, `rgba(159,122,234,${0.02 + intensity*0.08})`);
+      rctx.fillStyle = g; rctx.beginPath();
+      rctx.moveTo(pts[0].x, pts[0].y);
+      for(let i=1;i<pts.length-2;i++){
+        const xc = (pts[i].x + pts[i+1].x)/2; const yc = (pts[i].y + pts[i+1].y)/2;
+        rctx.quadraticCurveTo(pts[i].x, pts[i].y, xc, yc);
+      }
+      rctx.lineTo(W, H); rctx.lineTo(0,H); rctx.closePath(); rctx.fill();
+    }
+    rctx.globalCompositeOperation = 'source-over';
+  }
+
+  // finale particle burst (canvas) - executed when finale triggers
+  function particleBurst(cx, cy){
+    const particles = [];
+    for(let i=0;i<140;i++){
+      const angle = Math.random()*Math.PI*2;
+      const speed = Math.random()*6 + 1;
+      particles.push({x:cx, y:cy, vx:Math.cos(angle)*speed, vy:Math.sin(angle)*speed, life: Math.random()*1400+600, t:0, size: Math.random()*3+1});
+    }
+    let last = performance.now();
+    function step(now){
+      const dt = now - last; last = now;
+      fctx.clearRect(0,0,W,H);
+      for(let i=particles.length-1;i>=0;i--){
+        const p = particles[i];
+        p.t += dt;
+        p.x += p.vx * (dt/16); p.y += p.vy * (dt/16);
+        p.vy += 0.02 * (dt/16); // slight gravity
+        const alpha = Math.max(0, 1 - p.t / p.life);
+        fctx.beginPath(); fctx.fillStyle = `rgba(255,255,255,${alpha})`; fctx.arc(p.x,p.y,p.size,0,Math.PI*2); fctx.fill();
+        if(p.t > p.life) particles.splice(i,1);
+      }
+      if(particles.length) requestAnimationFrame(step);
+      else fctx.clearRect(0,0,W,H);
+    }
+    requestAnimationFrame(step);
+  }
+
+  // animate loop
+  let last=0, mouseX=0.5, mouseY=0.5;
+  function loop(t){
+    if(!last) last = t; const dt = Math.min(40, t-last); last = t;
+    // compute audio intensity via global var (set by audio module)
+    const intensity = window.__audioIntensity || 0;
+    drawStars(dt, mouseX, mouseY);
+    drawAurora(Math.min(1, intensity*1.4));
     requestAnimationFrame(loop);
   }
 
+  window.addEventListener('mousemove', (e)=>{ mouseX = e.clientX / window.innerWidth; mouseY = e.clientY / window.innerHeight; }, {passive:true});
   window.addEventListener('resize', throttle(resize, 160));
   resize();
   requestAnimationFrame(loop);
+
+  // expose finale trigger
+  window.__triggerFinaleCanvas = (cx=W/2, cy=H/2) => { particleBurst(cx, cy); };
 })();
 
-/* ========= Audio visualizer (WebAudio) ========= */
-(function AudioViz(){
+/* ======= Audio: WebAudio visualizer + progress + resume ======= */
+(function Audio(){
   const audio = document.getElementById('bg');
   const play = document.getElementById('play');
   const mute = document.getElementById('mute');
   const vol = document.getElementById('vol');
   const viz = document.getElementById('viz');
   const vctx = viz.getContext('2d');
+  const progressFill = document.getElementById('progressFill');
+  const timeEl = document.getElementById('time');
+  const finishBtn = document.getElementById('finishBtn');
+  const finishNow = document.getElementById('finishNow');
+
   let audioCtx, analyser, dataArr, raf;
+  let savedKey = 'maria_bg_pos_v1';
+  let saveTimer = null;
 
   function resizeViz(){
-    const rect = viz.getBoundingClientRect();
-    const dpr = Math.max(1, window.devicePixelRatio || 1);
-    viz.width = Math.floor(rect.width * dpr); viz.height = Math.floor(rect.height * dpr);
-    vctx.setTransform(dpr,0,0,dpr,0,0);
+    const rect = viz.getBoundingClientRect(); const dpr = Math.max(1, window.devicePixelRatio||1);
+    viz.width = Math.floor(rect.width * dpr); viz.height = Math.floor(rect.height * dpr); vctx.setTransform(dpr,0,0,dpr,0,0);
   }
-  window.addEventListener('resize', throttle(resizeViz,120));
+  window.addEventListener('resize', throttle(resizeViz, 120));
+  resizeViz();
 
   function ensureCtx(){
     if(audioCtx) return;
-    try{
-      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-      analyser = audioCtx.createAnalyser();
-      analyser.fftSize = 128;
-      const src = audioCtx.createMediaElementSource(audio);
-      src.connect(analyser); analyser.connect(audioCtx.destination);
-      dataArr = new Uint8Array(analyser.frequencyBinCount);
-      resizeViz();
-    }catch(e){ console.warn('AudioContext failed', e); }
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    analyser = audioCtx.createAnalyser();
+    analyser.fftSize = 256;
+    const src = audioCtx.createMediaElementSource(audio);
+    src.connect(analyser); analyser.connect(audioCtx.destination);
+    dataArr = new Uint8Array(analyser.frequencyBinCount);
   }
 
   function draw(){
-    if(!analyser) return raf = requestAnimationFrame(draw);
+    if(!analyser){ raf = requestAnimationFrame(draw); return; }
     analyser.getByteFrequencyData(dataArr);
     vctx.clearRect(0,0,viz.width, viz.height);
-    const barW = viz.width / dataArr.length;
-    const g = vctx.createLinearGradient(0,0,0,viz.height);
-    g.addColorStop(0,'#b794f6'); g.addColorStop(1,'#9f7aea'); vctx.fillStyle = g;
+    const barW = Math.max(2, viz.width / dataArr.length);
+    const gradient = vctx.createLinearGradient(0,0,0,viz.height);
+    gradient.addColorStop(0,'#b794f6'); gradient.addColorStop(1,'#9f7aea'); vctx.fillStyle = gradient;
+    let sum=0;
     for(let i=0;i<dataArr.length;i++){
-      const h = (dataArr[i]/255) * viz.height * 0.9;
+      const val = dataArr[i]; sum += val;
+      const h = (val/255) * viz.height * 0.9;
       vctx.fillRect(i*barW, viz.height - h, Math.max(1, barW-1), h);
     }
-    // subtle reactive glow on letter
-    const avg = dataArr.reduce((a,b)=>a+b,0)/dataArr.length/255;
-    const letter = document.querySelector('.letter');
-    if(letter) letter.style.boxShadow = `0 0 ${20 + avg*40}px rgba(183,148,246,${0.12 + avg*0.4})`;
+    // update global intensity for aurora
+    window.__audioIntensity = (sum / dataArr.length) / 255;
     raf = requestAnimationFrame(draw);
   }
 
-  // controls
-  play.addEventListener('click', async ()=>{
-    if(audio.paused){
-      ensureCtx();
-      try{ if(audioCtx && audioCtx.state === 'suspended') await audioCtx.resume(); }catch(e){}
-      await audio.play().catch(()=>{});
-      play.textContent = 'Pause';
-      if(!raf) draw();
-    } else { audio.pause(); play.textContent='Play'; cancelAnimationFrame(raf); raf=null; }
-  });
-  mute.addEventListener('click', ()=>{ audio.muted = !audio.muted; mute.textContent = audio.muted ? 'Unmute' : 'Mute'; });
-  vol.addEventListener('input', (e)=> audio.volume = parseFloat(e.target.value));
-
-  // ensure visualizer prepared on play gesture
-  audio.addEventListener('play', ()=> {
+  // sync play/pause UI, and save position
+  function tryPlay(){
     ensureCtx();
+    if(audioCtx && audioCtx.state === 'suspended') audioCtx.resume().catch(()=>{});
+    audio.play().catch(()=>{});
+    play.textContent = 'Pause';
     if(!raf) draw();
+    startAutoSave();
+  }
+  function tryPause(){ audio.pause(); play.textContent = 'Play'; cancelAnimationFrame(raf); raf=null; stopAutoSave(); }
+
+  play.addEventListener('click', ()=>{ if(audio.paused) tryPlay(); else tryPause(); });
+
+  mute.addEventListener('click', ()=>{ audio.muted = !audio.muted; mute.textContent = audio.muted ? 'Unmute' : 'Mute'; });
+  vol.addEventListener('input', e => { audio.volume = parseFloat(e.target.value); });
+
+  // progress bar & time
+  function updateProgress(){
+    const d = audio.duration || 0, t = audio.currentTime || 0;
+    const pct = d ? (t/d)*100 : 0;
+    progressFill.style.width = pct + '%';
+    timeEl.textContent = fmt(t) + (d ? ' / ' + fmt(d) : '');
+  }
+  setInterval(updateProgress, 250);
+
+  // save resume position every few seconds
+  function startAutoSave(){ stopAutoSave(); saveTimer = setInterval(()=>{ try{ localStorage.setItem(savedKey, Math.floor(audio.currentTime)); }catch(e){} }, 2500); }
+  function stopAutoSave(){ if(saveTimer){ clearInterval(saveTimer); saveTimer = null; } }
+
+  // handle ended -> trigger finale
+  audio.addEventListener('ended', ()=>{
+    play.textContent = 'Play'; stopAutoSave();
+    localStorage.removeItem(savedKey); triggerFinale(); // finished naturally -> finale
   });
 
-  // keyboard space toggles audio when overlay hidden
-  document.addEventListener('keydown', (e)=> {
-    if(e.code === 'Space' && document.activeElement.tagName !== 'INPUT' && document.getElementById('entry').classList.contains('entry-hidden')){
-      e.preventDefault();
-      play.click();
-    }
-  });
+  // A "Finish" button to trigger finale early
+  finishBtn.addEventListener('click', ()=> finishExperience());
+  finishNow.addEventListener('click', ()=> finishExperience());
 
-  resizeViz();
+  function finishExperience(){
+    // jump to the end gently and trigger finale
+    try{ audio.pause(); }catch(e){}
+    localStorage.removeItem(savedKey);
+    triggerFinale();
+  }
+
+  // resume support: show small bar if saved time exists
+  const resumeBar = document.getElementById('resumeBar');
+  const resumeTime = document.getElementById('resumeTime');
+  const resumeBtn = document.getElementById('resumeBtn');
+  const discardResume = document.getElementById('discardResume');
+
+  function showResumeIfAny(){
+    try{
+      const val = parseInt(localStorage.getItem(savedKey));
+      if(val && !isNaN(val) && val>5){
+        resumeTime.textContent = fmt(val);
+        resumeBar.style.display = 'flex';
+        resumeBtn.onclick = ()=>{ audio.currentTime = val; resumeBar.style.display='none'; tryPlay(); };
+        discardResume.onclick = ()=>{ localStorage.removeItem(savedKey); resumeBar.style.display='none'; };
+      }
+    }catch(e){}
+  }
+
+  // when audio plays, ensure UI sync
+  audio.addEventListener('play', ()=>{ play.textContent = 'Pause'; ensureCtx(); if(!raf) draw(); startAutoSave(); });
+  audio.addEventListener('pause', ()=>{ play.textContent = 'Play'; stopAutoSave(); });
+
+  // small safety: on page unload, save position
+  window.addEventListener('beforeunload', ()=>{ try{ localStorage.setItem(savedKey, Math.floor(audio.currentTime)); }catch(e){} });
+
+  // expose for other modules
+  window.__audio_controls = { play: tryPlay, pause: tryPause, audio };
+
+  // start
+  showResumeIfAny();
 })();
 
-/* ========= Memory lightbox & keyboard ========= */
-(function Lightbox(){
+/* ======= Memory click interactive bursts ======= */
+(function MemoryBursts(){
   const mems = Array.from(document.querySelectorAll('.memory'));
-  const lb = document.getElementById('lightbox');
-  const lbImg = lb.querySelector('img');
-  let idx = -1;
-  function open(i){
-    const fig = mems[i]; if(!fig) return;
-    lb.classList.add('open'); lb.setAttribute('aria-hidden','false');
-    lbImg.src = fig.querySelector('img').src; lbImg.alt = fig.dataset.caption || fig.querySelector('img').alt || '';
-    idx = i; document.body.style.overflow='hidden';
-  }
-  function close(){ lb.classList.remove('open'); lb.setAttribute('aria-hidden','true'); idx=-1; document.body.style.overflow=''; }
-  mems.forEach((m,i)=>{ m.addEventListener('click', ()=>open(i)); m.addEventListener('keydown', (e)=>{ if(e.key==='Enter' || e.key===' ') open(i); }); });
-  lb.addEventListener('click',(e)=>{ if(e.target===lb) close(); });
-  document.addEventListener('keydown',(e)=>{ if(lb.classList.contains('open')){ if(e.key==='Escape') close(); if(e.key==='ArrowRight') open((idx+1)%mems.length); if(e.key==='ArrowLeft') open((idx-1+mems.length)%mems.length); }});
-})();
-
-/* ========= Small 3D tilt for memory cards (mouse & touch) ========= */
-(function Tilt(){
-  const cards = Array.from(document.querySelectorAll('.memory'));
-  cards.forEach(card=>{
-    let rect;
-    card.addEventListener('mousemove', e=>{
-      rect = rect || card.getBoundingClientRect();
-      const x = (e.clientX - rect.left) / rect.width;
-      const y = (e.clientY - rect.top) / rect.height;
-      const ry = (x - 0.5) * 12;
-      const rx = (y - 0.5) * -12;
-      card.style.transform = `rotateY(${ry}deg) rotateX(${rx}deg) scale(1.03)`;
+  mems.forEach(m=>{
+    m.addEventListener('click', (e)=>{
+      // interactive small canvas-local particle at click position (DOM-light)
+      const burst = document.createElement('div');
+      burst.style.position='fixed'; burst.style.left= e.clientX+'px'; burst.style.top = e.clientY+'px';
+      burst.style.width = burst.style.height = '6px'; burst.style.borderRadius='50%'; burst.style.background = 'rgba(183,148,246,0.95)'; burst.style.pointerEvents='none'; burst.style.zIndex = 1200;
+      burst.style.transform = 'translate(-50%,-50%) scale(0)';
+      burst.style.transition = 'transform .6s cubic-bezier(.16,.9,.3,1), opacity .6s';
+      document.body.appendChild(burst);
+      requestAnimationFrame(()=>{ burst.style.transform='translate(-50%,-50%) scale(8)'; burst.style.opacity='0'; });
+      setTimeout(()=>burst.remove(),700);
+      // also open lightbox
+      const idx = mems.indexOf(m);
+      openLightbox(idx);
     });
-    card.addEventListener('mouseleave', ()=> card.style.transform = '');
-    // simple touch fallback
-    card.addEventListener('touchstart', ()=> card.style.transform = 'scale(1.02)');
-    card.addEventListener('touchend', ()=> card.style.transform = '');
   });
+
+  // simple lightbox
+  const lb = document.getElementById('lightbox'), img = lb.querySelector('img');
+  let idx = -1;
+  function openLightbox(i){
+    const m = mems[i];
+    img.src = m.querySelector('img').src; img.alt = m.dataset.caption || '';
+    lb.classList.add('open'); lb.setAttribute('aria-hidden','false'); idx = i; document.body.style.overflow='hidden';
+  }
+  function closeLightbox(){ lb.classList.remove('open'); lb.setAttribute('aria-hidden','true'); document.body.style.overflow=''; idx=-1; }
+  lb.addEventListener('click', (e)=>{ if(e.target===lb) closeLightbox(); });
+  document.addEventListener('keydown', (e)=>{ if(lb.classList.contains('open')){ if(e.key==='Escape') closeLightbox(); if(e.key==='ArrowRight') openLightbox((idx+1)%mems.length); if(e.key==='ArrowLeft') openLightbox((idx-1+mems.length)%mems.length); }});
+  window.openLightbox = openLightbox;
 })();
 
-/* ========= Entry overlay behavior (gesture safe) ========= */
-(function Entry(){
-  const overlay = document.getElementById('entry');
-  const main = document.getElementById('main');
-  const btn = document.getElementById('enterListen');
-  const btnSilent = document.getElementById('enterSilent');
-  const audio = document.getElementById('bg');
+/* ======= Finale orchestration: visual + name reveal ======= */
+(function Finale(){
+  const finaleName = document.getElementById('nameFinale');
+  let triggered=false;
+  window.triggerFinale = function(){
+    if(triggered) return; triggered=true;
+    // show name
+    finaleName.classList.add('finale');
+    finaleName.setAttribute('aria-hidden','false');
+    // canvas burst centered
+    const cx = window.innerWidth/2, cy = window.innerHeight/2;
+    window.__triggerFinaleCanvas(cx, cy);
+    // small confetti-like secondary bursts
+    for(let i=0;i<30;i++){
+      setTimeout(()=>{ // create small DOM sparkles too
+        const s = document.createElement('div');
+        s.style.position='fixed'; s.style.left = (window.innerWidth/2) + (Math.random()*400-200) + 'px';
+        s.style.top = (window.innerHeight/2) + (Math.random()*400-200) + 'px';
+        s.style.width = s.style.height = (Math.random()*4+2)+'px';
+        s.style.borderRadius='50%'; s.style.background = 'white'; s.style.opacity='0.9'; s.style.pointerEvents='none'; s.style.zIndex=1300;
+        s.style.transform='scale(0)'; s.style.transition='transform .9s ease-out, opacity .9s ease-out';
+        document.body.appendChild(s);
+        requestAnimationFrame(()=>{ s.style.transform='scale(1.6)'; s.style.opacity='0' });
+        setTimeout(()=>s.remove(),900);
+      }, i*28);
+    }
+  };
 
-  function open(playAudio){
-    overlay.classList.add('entry-hidden'); main.classList.add('visible');
-    try{ localStorage.setItem('visited_v2','1'); }catch(e){}
-    if(playAudio){
-      audio.play().catch(()=>{ /* browser blocked; user can press play */ });
-      // sync the "Play" control text
-      document.getElementById('play').textContent = 'Pause';
+  // also if audio ended naturally we call this (handled in audio module)
+  // If user leaves before end: we saved position in localStorage so they can resume. If they never return, they can press "Finish" button to trigger finale manually.
+})();
+
+/* ======= Entry overlay controls + resume bar ======= */
+(function EntryAndResume(){
+  const entry = document.getElementById('entry');
+  const enterListen = document.getElementById('enterListen');
+  const enterSilent = document.getElementById('enterSilent');
+  const finishNow = document.getElementById('finishNow');
+  const main = document.getElementById('main');
+  const audio = document.getElementById('bg');
+  const resumeBar = document.getElementById('resumeBar');
+  const savedKey = 'maria_bg_pos_v1';
+  const resumeVal = parseInt(localStorage.getItem(savedKey));
+
+  function open(play){
+    entry.classList.add('entry-hidden'); main.classList.add('visible');
+    if(play){
+      window.__audio_controls.play();
     }
   }
-  btn.addEventListener('click', ()=> open(true));
-  btnSilent.addEventListener('click', ()=> open(false));
+  enterListen.addEventListener('click', ()=> open(true));
+  enterSilent.addEventListener('click', ()=> open(false));
+  finishNow.addEventListener('click', ()=>{ entry.classList.add('entry-hidden'); main.classList.add('visible'); window.triggerFinale(); });
 
-  // keyboard
+  // resume bar logic
+  if(resumeVal && !isNaN(resumeVal) && resumeVal > 5){
+    const bar = document.getElementById('resumeBar');
+    const rtime = document.getElementById('resumeTime'); rtime.textContent = fmt(resumeVal);
+    bar.style.display = 'flex';
+    document.getElementById('resumeBtn').onclick = ()=>{ audio.currentTime = resumeVal; bar.style.display='none'; open(true); };
+    document.getElementById('discardResume').onclick = ()=>{ localStorage.removeItem(savedKey); bar.style.display='none'; };
+  }
+
+  // keyboard support for overlay
   document.addEventListener('keydown', (e)=>{
-    if(!overlay.classList.contains('entry-hidden') && (e.key === 'Enter' || e.key === ' ')){
+    if(!entry.classList.contains('entry-hidden') && (e.key === 'Enter' || e.key === ' ')){
       e.preventDefault(); open(true);
     }
   });
-
-  // skip if visited
-  if(localStorage.getItem('visited_v2')){
-    open(false);
-  }
 })();
 
-/* ========= Finale on scroll ========= */
-(function Finale(){
-  const finale = document.getElementById('nameFinale');
-  let triggered = false;
-  window.addEventListener('scroll', throttle(()=>{
-    if(triggered) return;
-    const atBottom = (window.innerHeight + window.scrollY) >= (document.body.offsetHeight - 120);
-    if(atBottom){
-      triggered = true; finale.classList.add('finale');
-      // particle burst (DOM-light)
-      for(let i=0;i<50;i++){
-        setTimeout(()=>{
-          const p = document.createElement('div');
-          p.style.position='fixed'; p.style.width=p.style.height=(Math.random()*4+2)+'px';
-          p.style.borderRadius='50%'; p.style.left='50%'; p.style.top='50%'; p.style.background='white';
-          p.style.pointerEvents='none'; p.style.zIndex=1200;
-          p.style.transform='translate(-50%,-50%)';
-          p.style.animation = `burst ${Math.random()*1.6+0.6}s ease-out forwards`;
-          document.body.appendChild(p);
-          setTimeout(()=>p.remove(),2200);
-        }, i*18);
-      }
-    }
-  }, 120));
-
-  // inject burst keyframes with random offsets
-  const style = document.createElement('style');
-  style.textContent = `@keyframes burst { to { transform: translate(calc(-50% + var(--tx)), calc(-50% + var(--ty))) scale(1.2); opacity:0 } }`;
-  document.head.appendChild(style);
-})();
-
-/* ========= Init: ensure canvases sized ========= */
-(function initResize(){
-  function fit(){
-    const s = document.getElementById('stars');
-    const r = document.getElementById('reactive');
-    [s,r].forEach(el=>{
-      el.style.width = window.innerWidth+'px'; el.style.height = window.innerHeight+'px';
-      el.width = Math.floor(window.innerWidth * (window.devicePixelRatio||1));
-      el.height = Math.floor(window.innerHeight * (window.devicePixelRatio||1));
-    });
-  }
-  window.addEventListener('resize', throttle(fit, 120));
-  fit();
-  // small delay in case fonts/images change dimensions
+/* ======= init sizing ======= */
+(function init(){
+  function fit(){ ['#stars','#reactive','#finaleParticles','#viz'].forEach(id=>{ const el=document.querySelector(id); if(!el) return; el.style.width = window.innerWidth+'px'; el.style.height = window.innerHeight+'px'; el.width = Math.floor(window.innerWidth*(window.devicePixelRatio||1)); el.height = Math.floor(window.innerHeight*(window.devicePixelRatio||1)); }); }
+  window.addEventListener('resize', throttle(fit, 120)); fit();
   setTimeout(fit, 300);
 })();
 </script>
