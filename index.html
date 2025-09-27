@@ -1,561 +1,753 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Happy Birthday Ela — A Celestial Gift</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ela's Celestial Birthday - A Love Letter Written in Stars</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,300;0,400;1,400&family=Inter:wght@300;400;600&display=swap');
 
-  <!-- Tailwind (CDN single-file friendly) -->
-  <script src="https://cdn.tailwindcss.com"></script>
+        :root {
+            --cosmic-primary: #000428;
+            --cosmic-secondary: #004e92;
+            --cosmic-accent: #b794f6;
+            --cosmic-glow: #9f7aea;
+            --cosmic-text: #f0e6ff;
+            --scroll-progress: 0;
+            --mouse-x: 50%;
+            --mouse-y: 50%;
+        }
 
-  <style>
-    :root{
-      --cosmic-primary: #000428;   /* original */
-      --cosmic-secondary: #004e92; /* original */
-      --cosmic-accent: #b794f6;   /* original */
-      --cosmic-glow: #9f7aea;     /* original */
-      --cosmic-text: #f0e6ff;     /* original */
-      --glass: rgba(255,255,255,0.04);
-    }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-    html,body { height:100%; }
-    body{
-      margin:0;
-      min-height:100%;
-      font-family: Georgia, 'Times New Roman', serif;
-      background: linear-gradient(180deg, var(--cosmic-primary) 0%, var(--cosmic-secondary) 100%);
-      color: var(--cosmic-text);
-      -webkit-font-smoothing:antialiased;
-    }
+        body {
+            background: linear-gradient(180deg, var(--cosmic-primary) 0%, var(--cosmic-secondary) 100%);
+            font-family: 'Crimson Pro', serif;
+            color: var(--cosmic-text);
+            overflow-x: hidden;
+        }
 
-    /* Overlay */
-    .entry-overlay {
-      position: fixed; inset: 0; z-index:60;
-      display:grid; place-items:center;
-      background: radial-gradient(ellipse at var(--mouse-x,50%) var(--mouse-y,50%), rgba(255,255,255,0.02), rgba(0,0,0,0.7));
-      transition: opacity .6s ease, transform .6s ease;
-    }
-    .entry-overlay.hidden { opacity:0; transform: scale(1.02); pointer-events:none; }
+        /* Fluid Typography with clamp() */
+        h1 { font-size: clamp(2rem, 5vw, 4rem); }
+        h2 { font-size: clamp(1.5rem, 4vw, 2.5rem); }
+        p { font-size: clamp(1rem, 2vw, 1.125rem); }
 
-    /* Canvas */
-    #starCanvas { position: fixed; inset:0; z-index:0; display:block; }
-    #cardCanvas { display:none; } /* used for export only */
+        /* Entry Portal - Atom */
+        .portal-overlay {
+            position: fixed;
+            inset: 0;
+            background: radial-gradient(ellipse at var(--mouse-x) var(--mouse-y), #1b2735 0%, #090a0f 100%);
+            z-index: 9999;
+            display: grid;
+            place-items: center;
+            transition: opacity 1s cubic-bezier(0.4, 0, 0, 1), transform 1s cubic-bezier(0.4, 0, 0, 1);
+            will-change: opacity, transform;
+        }
 
-    /* Generative placeholder sizes */
-    .gen-placeholder svg { width:100%; height:100%; display:block; border-radius:14px; }
+        .portal-overlay.hidden {
+            opacity: 0;
+            transform: scale(1.1);
+            pointer-events: none;
+        }
 
-    /* accessible focus */
-    button:focus, a:focus, input:focus { outline: 3px solid rgba(183,148,246,0.16); outline-offset:4px; }
+        /* Cosmic Shimmer - Atom */
+        .cosmic-shimmer {
+            background: linear-gradient(90deg, var(--cosmic-text), var(--cosmic-accent), var(--cosmic-glow), var(--cosmic-accent), var(--cosmic-text));
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: shimmer 3s linear infinite;
+        }
 
-    /* Reduced motion */
-    @media (prefers-reduced-motion: reduce) {
-      * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
-    }
-  </style>
+        @keyframes shimmer {
+            to { background-position: 200% center; }
+        }
+
+        /* Glass Card - Molecule */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 1.5rem;
+            padding: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .glass-card::before {
+            content: '';
+            position: absolute;
+            inset: -50%;
+            background: conic-gradient(from 0deg at 50% 50%, transparent, var(--cosmic-accent), transparent);
+            animation: spin 15s linear infinite;
+            opacity: 0.05;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Optimized Canvas */
+        #starCanvas, #generativeCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        #starCanvas { z-index: 1; }
+        #generativeCanvas { z-index: 2; mix-blend-mode: screen; }
+
+        /* Audio Visualizer - Molecule */
+        .audio-viz {
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            gap: 4px;
+            height: 50px;
+            margin: 1.5rem 0;
+        }
+
+        .viz-bar {
+            width: 4px;
+            background: linear-gradient(to top, var(--cosmic-accent), var(--cosmic-glow));
+            border-radius: 2px;
+            transform-origin: bottom;
+            transition: height 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Birthday Card Generator - Organism */
+        .card-generator {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            height: 400px;
+            margin: 2rem auto;
+        }
+
+        /* Letter Content */
+        .letter-content p {
+            line-height: 1.8;
+            margin-bottom: 1.5rem;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        .letter-content.visible p {
+            animation: fadeUp 0.6s forwards;
+        }
+
+        .letter-content p:nth-child(1) { animation-delay: 0.1s; }
+        .letter-content p:nth-child(2) { animation-delay: 0.2s; }
+        .letter-content p:nth-child(3) { animation-delay: 0.3s; }
+        .letter-content p:nth-child(4) { animation-delay: 0.4s; }
+        .letter-content p:nth-child(5) { animation-delay: 0.5s; }
+        .letter-content p:nth-child(6) { animation-delay: 0.6s; }
+        .letter-content p:nth-child(7) { animation-delay: 0.7s; }
+
+        @keyframes fadeUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Reduce Motion Support */
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+                scroll-behavior: auto !important;
+            }
+        }
+
+        /* Hidden utility for screen readers */
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border-width: 0;
+        }
+    </style>
 </head>
 <body>
+    <!-- Star Canvas Background -->
+    <canvas id="starCanvas" aria-hidden="true"></canvas>
+    <canvas id="generativeCanvas" aria-hidden="true"></canvas>
 
-  <!-- STAR CANVAS -->
-  <canvas id="starCanvas" aria-hidden="true"></canvas>
-
-  <!-- ENTRY OVERLAY (user gesture required to allow audio) -->
-  <div id="entryOverlay" class="entry-overlay" role="dialog" aria-modal="true" aria-label="Enter birthday experience">
-    <div class="max-w-xl mx-4 p-8 rounded-2xl" style="backdrop-filter: blur(8px); border:1px solid rgba(255,255,255,0.04);">
-      <h1 class="text-2xl sm:text-4xl font-semibold" style="background:linear-gradient(90deg,var(--cosmic-text),var(--cosmic-accent)); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">
-        A Journey Through the Stars — For Ela
-      </h1>
-      <p class="mt-3 text-sm text-gray-200/80 italic">Click to enter. The piano waits.</p>
-
-      <div class="mt-6 flex gap-3 justify-center">
-        <button id="enterPlay" class="px-6 py-3 rounded-full border border-white/20">Enter & Play Music</button>
-        <button id="enterSilent" class="px-6 py-3 rounded-full bg-white/6">Enter (no sound)</button>
-      </div>
-
-      <p class="mt-4 text-xs text-gray-300/70">Audio plays only after your gesture (browser policy).</p>
+    <!-- Entry Portal -->
+    <div class="portal-overlay" id="portal" role="dialog" aria-modal="true" aria-labelledby="portal-title">
+        <div class="text-center p-8">
+            <h1 id="portal-title" class="cosmic-shimmer mb-4">A Celestial Birthday Journey</h1>
+            <p class="text-lg mb-8 opacity-80">For Ela, on her special day</p>
+            <button 
+                id="enterBtn" 
+                class="px-8 py-3 border border-purple-400/50 rounded-full hover:bg-purple-900/20 transition-all focus:outline-none focus:ring-2 focus:ring-purple-400"
+                aria-label="Enter the birthday experience and start music"
+            >
+                Enter & Begin the Magic ✨
+            </button>
+        </div>
     </div>
-  </div>
 
-  <!-- Main content (semantic) -->
-  <main class="relative z-10 min-h-screen" id="main" role="main" aria-labelledby="pageTitle">
-    <header class="max-w-4xl mx-auto px-6 pt-12">
-      <nav class="flex items-center justify-between" role="navigation" aria-label="Main">
-        <div class="text-sm font-medium">Ela • Birthday</div>
-        <div class="text-xs text-gray-200/70">Handmade with care</div>
-      </nav>
+    <!-- Main Content -->
+    <main class="relative z-10 container mx-auto px-4 py-12 opacity-0 transition-opacity duration-1000" id="mainContent">
+        <!-- Header Section -->
+        <header class="text-center mb-12">
+            <h1 class="cosmic-shimmer mb-4">Happy Birthday, Ela</h1>
+            <p class="text-xl opacity-90">Today we celebrate the light you bring to this universe</p>
+        </header>
 
-      <h2 id="pageTitle" class="mt-8 text-center text-2xl sm:text-3xl" style="background:linear-gradient(90deg,var(--cosmic-text),var(--cosmic-accent)); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">
-        Happy Birthday, Ela
-      </h2>
-    </header>
-
-    <section class="max-w-4xl mx-auto px-6 py-8 grid gap-6" aria-label="Birthday content">
-
-      <!-- Audio (kept local) -->
-      <div class="rounded-2xl p-4" style="background:linear-gradient(135deg, rgba(255,255,255,0.02), rgba(255,255,255,0.03)); border:1px solid rgba(255,255,255,0.04);">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <h3 class="font-semibold">♪ Pisces — Tony Ann (Piano Cover)</h3>
-            <p class="text-sm text-gray-200/70">A quiet piece for your birthday evening.</p>
-          </div>
-
-          <div class="flex items-center gap-3">
-            <button id="playToggle" class="px-4 py-2 rounded-full border border-white/10 text-sm" aria-pressed="false" aria-label="Play or pause music">Play / Pause</button>
-            <div aria-hidden="true" id="miniViz" class="w-32 grid grid-cols-7 gap-1 h-8">
-              <span class="block rounded-sm" style="height:28%;background:linear-gradient(to top,#b794f6,#9f7aea)"></span>
-              <span class="block rounded-sm" style="height:55%;background:linear-gradient(to top,#9f7aea,#b794f6)"></span>
-              <span class="block rounded-sm" style="height:38%;background:linear-gradient(to top,#b794f6,#9f7aea)"></span>
-              <span class="block rounded-sm" style="height:70%;background:linear-gradient(to top,#ffd89b,#b794f6)"></span>
-              <span class="block rounded-sm" style="height:45%;background:linear-gradient(to top,#b794f6,#9f7aea)"></span>
-              <span class="block rounded-sm" style="height:60%;background:linear-gradient(to top,#9f7aea,#ffd89b)"></span>
-              <span class="block rounded-sm" style="height:35%;background:linear-gradient(to top,#ffd89b,#b794f6)"></span>
+        <!-- Audio Player Section -->
+        <section class="max-w-md mx-auto mb-12 glass-card" aria-label="Birthday Music Player">
+            <h2 class="text-center text-lg mb-4 text-purple-300">♪ Your Birthday Melody ♪</h2>
+            <div class="audio-viz" id="audioViz" aria-hidden="true">
+                <div class="viz-bar" style="height: 20%"></div>
+                <div class="viz-bar" style="height: 40%"></div>
+                <div class="viz-bar" style="height: 30%"></div>
+                <div class="viz-bar" style="height: 50%"></div>
+                <div class="viz-bar" style="height: 35%"></div>
+                <div class="viz-bar" style="height: 45%"></div>
+                <div class="viz-bar" style="height: 25%"></div>
             </div>
-          </div>
+            <audio id="bgMusic" loop aria-label="Background music">
+                <source src="Pisces - Tony Ann (Piano Cover).mp3" type="audio/mpeg">
+            </audio>
+            <button 
+                id="musicToggle" 
+                class="w-full mt-4 px-4 py-2 bg-purple-900/30 rounded-lg hover:bg-purple-900/50 transition-colors"
+                aria-pressed="false"
+                aria-label="Toggle music playback"
+            >
+                Pause / Resume Music
+            </button>
+        </section>
 
-        </div>
+        <!-- Birthday Countdown Timer -->
+        <section class="max-w-lg mx-auto mb-12 glass-card text-center" aria-live="polite" aria-label="Birthday countdown">
+            <h2 class="text-2xl mb-6 text-purple-300">Time Until Your Next Adventure</h2>
+            <div class="grid grid-cols-4 gap-4" id="countdown">
+                <div>
+                    <div class="text-3xl font-bold cosmic-shimmer" id="days">365</div>
+                    <div class="text-sm opacity-70">Days</div>
+                </div>
+                <div>
+                    <div class="text-3xl font-bold cosmic-shimmer" id="hours">00</div>
+                    <div class="text-sm opacity-70">Hours</div>
+                </div>
+                <div>
+                    <div class="text-3xl font-bold cosmic-shimmer" id="minutes">00</div>
+                    <div class="text-sm opacity-70">Minutes</div>
+                </div>
+                <div>
+                    <div class="text-3xl font-bold cosmic-shimmer" id="seconds">00</div>
+                    <div class="text-sm opacity-70">Seconds</div>
+                </div>
+            </div>
+        </section>
 
-        <audio id="bgMusic" loop preload="metadata">
-          <source src="Pisces - Tony Ann (Piano Cover).mp3" type="audio/mpeg">
-          Your browser does not support audio.
-        </audio>
-      </div>
+        <!-- Interactive Birthday Card Generator -->
+        <section class="max-w-2xl mx-auto mb-12 glass-card" aria-label="Birthday card generator">
+            <h2 class="text-2xl mb-6 text-center text-purple-300">Your Personalized Birthday Card</h2>
+            <div class="card-generator">
+                <svg id="birthdayCard" width="100%" height="100%" viewBox="0 0 600 400" xmlns="http://www.w3.org/2000/svg">
+                    <!-- SVG Filters for Generative Effects -->
+                    <defs>
+                        <filter id="turbulence">
+                            <feTurbulence type="fractalNoise" baseFrequency="0.02" numOctaves="3" result="turbulence"/>
+                            <feColorMatrix in="turbulence" type="saturate" values="0"/>
+                        </filter>
+                        <linearGradient id="cardGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#b794f6;stop-opacity:0.3"/>
+                            <stop offset="100%" style="stop-color:#9f7aea;stop-opacity:0.3"/>
+                        </linearGradient>
+                    </defs>
+                    <!-- Card Background -->
+                    <rect width="600" height="400" fill="url(#cardGradient)" filter="url(#turbulence)" opacity="0.5"/>
+                    <!-- Dynamic Text -->
+                    <text x="300" y="100" text-anchor="middle" fill="#f0e6ff" font-size="32" font-family="Crimson Pro">Happy Birthday, Ela!</text>
+                    <text x="300" y="200" text-anchor="middle" fill="#b794f6" font-size="18" font-family="Inter" id="cardMessage">Click to generate a unique message</text>
+                </svg>
+            </div>
+            <button 
+                id="generateCard" 
+                class="w-full mt-6 px-6 py-3 bg-gradient-to-r from-purple-600 to-purple-800 rounded-lg hover:from-purple-700 hover:to-purple-900 transition-all text-white font-medium"
+                aria-label="Generate new birthday message"
+            >
+                Generate New Birthday Wish ✨
+            </button>
+            <button 
+                id="downloadCard" 
+                class="w-full mt-3 px-6 py-3 border border-purple-400/50 rounded-lg hover:bg-purple-900/20 transition-all"
+                aria-label="Download birthday card as image"
+            >
+                Download Your Card 💝
+            </button>
+        </section>
 
-      <!-- Memories: generative SVG placeholders (no external people images) -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-6" role="region" aria-label="Memory placeholders">
-        <figure class="rounded-2xl overflow-hidden" style="min-height:160px; border:1px solid rgba(255,255,255,0.04);">
-          <div class="gen-placeholder w-full h-full" id="genMem1" aria-hidden="false" aria-label="Generative memory placeholder 1">
-            <!-- Inline SVG generative background using feTurbulence + color -->
-            <svg viewBox="0 0 600 350" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Generative texture">
-              <defs>
-                <filter id="noise1">
-                  <feTurbulence baseFrequency="0.9" numOctaves="2" stitchTiles="stitch"></feTurbulence>
-                  <feColorMatrix type="saturate" values="0.0" result="mono" />
-                  <feBlend in="SourceGraphic" in2="mono" mode="screen" />
-                </filter>
-                <linearGradient id="g1" x1="0" x2="1">
-                  <stop offset="0" stop-color="#0b1020"/>
-                  <stop offset="1" stop-color="#0f3b73"/>
-                </linearGradient>
-              </defs>
-              <rect width="100%" height="100%" fill="url(#g1)"/>
-              <g opacity="0.08">
-                <rect width="100%" height="100%" filter="url(#noise1)"/>
-              </g>
-              <g transform="translate(30,40)">
-                <text x="0" y="0" fill="#b794f6" font-size="28" font-family="Georgia, serif">Ela — Birthday</text>
-                <text x="0" y="38" fill="rgba(255,255,255,0.7)" font-size="13" font-family="Georgia, serif">Generate a personal photo later</text>
-              </g>
-            </svg>
-          </div>
-          <figcaption class="p-3 text-xs text-gray-300/70">Generative placeholder — no external photos used. Add local if you want.</figcaption>
-        </figure>
+        <!-- Birthday Letter -->
+        <article class="max-w-4xl mx-auto mb-12 glass-card" aria-labelledby="letter-title">
+            <h2 id="letter-title" class="text-3xl mb-8 text-center cosmic-shimmer">To Ela, On Your Birthday</h2>
+            <div class="letter-content" id="letterContent">
+                <p>
+                    Ela, birthdays are strange things when you think about them. We pick one day out of 365 to say "this is when we celebrate you existing." But honestly? That feels insufficient. Because the truth is, your existence reshapes every single day for those lucky enough to know you.
+                </p>
+                <p>
+                    Remember last Tuesday when you laughed so hard at that ridiculous meme that you snorted? That wasn't a birthday, but it was a celebration. Or that time you spent twenty minutes picking the perfect shade of nail polish, holding each bottle up to the light like you were choosing the color of the sunset? Those moments—those tiny, perfect, entirely you moments—they're what birthdays are really about.
+                </p>
+                <p>
+                    You have this thing where you tilt your head slightly when you're really listening to someone. Not the polite listening most people do, but the real kind, where you're absorbing every word like it matters. Because to you, it does. That's rare, Ela. That's the kind of rare that changes people's entire days without you even knowing it.
+                </p>
+                <p>
+                    I love how you get genuinely excited about small pleasures. Good coffee in the morning. Finding a song that perfectly matches your mood. The way autumn light hits the window at 4 PM. You don't just notice these things—you celebrate them. You've taught me that joy doesn't always announce itself with fanfare. Sometimes it whispers, and you've trained yourself to hear it.
+                </p>
+                <p>
+                    You're beautiful in ways that have nothing to do with what any mirror could show. It's in your kindness when no one's watching. The way you remember the little things people tell you. How you make space for others' feelings even when your own plate is full. That kind of beauty doesn't fade or change with trends—it just keeps growing, layer by layer, year by year.
+                </p>
+                <p>
+                    On this birthday, I want you to know that you're not just loved—you're understood. Seen. Appreciated for exactly who you are, not who you think you should be. Every quirk, every dream, every moment of doubt, every burst of confidence—all of it adds up to someone irreplaceable.
+                </p>
+                <p>
+                    Happy birthday, Ela. Here's to another year of you being brilliantly, unapologetically, wonderfully yourself. The universe got it right with you.
+                </p>
+            </div>
+        </article>
 
-        <figure class="rounded-2xl overflow-hidden" style="min-height:160px; border:1px solid rgba(255,255,255,0.04);">
-          <div class="gen-placeholder w-full h-full" id="genMem2" aria-hidden="false">
-            <svg viewBox="0 0 600 350" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Generative texture 2">
-              <defs>
-                <filter id="noise2">
-                  <feTurbulence baseFrequency="0.6" numOctaves="3" stitchTiles="stitch"></feTurbulence>
-                  <feColorMatrix type="matrix" values="0 0 0 0 .1  0 0 0 0 .05  0 0 0 0 .12  0 0 0 1 0" result="col" />
-                </filter>
-                <radialGradient id="rg" cx="50%" cy="30%">
-                  <stop offset="0" stop-color="#2b0f66"/>
-                  <stop offset="1" stop-color="#001022"/>
-                </radialGradient>
-              </defs>
-              <rect width="100%" height="100%" fill="url(#rg)"/>
-              <g opacity="0.06">
-                <rect width="100%" height="100%" filter="url(#noise2)"/>
-              </g>
-              <g transform="translate(28,40)">
-                <text x="0" y="0" fill="#9f7aea" font-size="28" font-family="Georgia, serif">Memory Frame</text>
-                <text x="0" y="38" fill="rgba(255,255,255,0.65)" font-size="13" font-family="Georgia, serif">Generative art — organic texture</text>
-              </g>
-            </svg>
-          </div>
-          <figcaption class="p-3 text-xs text-gray-300/70">SVG-based organic textures — accessible and performant.</figcaption>
-        </figure>
-      </div>
+        <!-- Interactive Wish Display -->
+        <section class="max-w-lg mx-auto mb-12 text-center" aria-live="polite">
+            <p class="text-2xl cosmic-shimmer" id="dynamicWish">With all my love, today and always 💫</p>
+        </section>
+    </main>
 
-      <!-- Heartfelt letter (human voice, not AI-ish) -->
-      <article id="letter" class="rounded-2xl p-6" style="background:linear-gradient(135deg, rgba(255,255,255,0.02), rgba(255,255,255,0.03)); border:1px solid rgba(255,255,255,0.05);" aria-labelledby="letterTitle">
-        <h3 id="letterTitle" class="text-lg font-semibold mb-3">To Ela — on your birthday</h3>
+    <script>
+        'use strict';
 
-        <p class="mb-3 leading-relaxed">
-          Ela — today I want to celebrate you the simple way: with truth. You brighten rooms by being there, not by trying. You keep a calm that helps me breathe, and you laugh in a way I try to remember.
-        </p>
-        <p class="mb-3 leading-relaxed">
-          You are beautiful not only in how you look, but in your steadiness, the care you give, the details you notice. I notice the way you fold notes, how you pick the small things on purpose; those tiny choices teach me who you are.
-        </p>
-        <p class="mb-3 leading-relaxed">
-          For your birthday I want to keep it honest: I admire the person you are. I’ll make time for the things you love — the music, the late-night talks, the mango Pepsi runs — and try to be better at showing up.
-        </p>
-        <p class="mb-0 leading-relaxed">
-          Happy birthday, Ela. Let’s make today soft and bright in all the best ways.
-        </p>
-        <div class="mt-4 text-sm text-gray-200/70">— With all my love</div>
-      </article>
+        // Pure Functional Birthday Experience with Immutable State
+        const BirthdayExperience = (() => {
+            // Immutable State Management
+            const createImmutableStore = (initialState) => {
+                let state = Object.freeze({...initialState});
+                const listeners = new Set();
+                
+                return {
+                    getState: () => state,
+                    setState: (updater) => {
+                        const newState = Object.freeze({...state, ...updater(state)});
+                        state = newState;
+                        listeners.forEach(listener => listener(newState));
+                        return newState;
+                    },
+                    subscribe: (listener) => {
+                        listeners.add(listener);
+                        return () => listeners.delete(listener);
+                    }
+                };
+            };
 
-      <!-- Constellation controls (fully interactive feature) -->
-      <div class="flex flex-col sm:flex-row items-center gap-3 justify-between">
-        <div class="text-sm text-gray-200/80">Click on the sky to add constellation points; click again to deselect.</div>
-        <div class="flex gap-2">
-          <button id="clearConst" class="px-3 py-2 rounded-full border border-white/10 text-sm">Clear Constellation</button>
-          <button id="exportCard" class="px-3 py-2 rounded-full bg-gradient-to-r from-pink-500 to-violet-500 text-white text-sm">Export Birthday Card</button>
-        </div>
-      </div>
+            // Application State
+            const store = createImmutableStore({
+                isPlaying: false,
+                mouseX: 0.5,
+                mouseY: 0.5,
+                birthdayDate: new Date(new Date().getFullYear() + 1, 8, 15), // Set Ela's birthday
+                currentWish: 0,
+                particles: new Float32Array(500 * 5) // x, y, size, speed, phase
+            });
 
-      <p id="ariaLive" class="sr-only" aria-live="polite" aria-atomic="true"></p>
-    </section>
+            // Birthday Wishes (Human-written, varied)
+            const wishes = [
+                "Every star tonight shines for you, Ela",
+                "Your smile could power entire galaxies",
+                "Another year of you making the world brighter",
+                "Today we celebrate the miracle that is you",
+                "365 new days of adventures await you",
+                "You're proof that magic exists in this world",
+                "May your dreams be as limitless as the cosmos",
+                "Your kindness ripples through the universe"
+            ];
 
-    <footer class="max-w-4xl mx-auto px-6 py-10 text-center text-xs text-gray-300/70">
-      Built with careful performance & love • local music kept intact
-    </footer>
-  </main>
+            // Optimized Canvas Setup
+            const setupCanvas = (id) => {
+                const canvas = document.getElementById(id);
+                if (!canvas) return null;
+                
+                const ctx = canvas.getContext('2d', {
+                    alpha: true,
+                    desynchronized: true,
+                    willReadFrequently: false
+                });
+                
+                const resize = () => {
+                    const dpr = window.devicePixelRatio || 1;
+                    const rect = canvas.getBoundingClientRect();
+                    canvas.width = rect.width * dpr;
+                    canvas.height = rect.height * dpr;
+                    ctx.scale(dpr, dpr);
+                    canvas.style.width = rect.width + 'px';
+                    canvas.style.height = rect.height + 'px';
+                };
+                
+                resize();
+                window.addEventListener('resize', resize, {passive: true});
+                
+                return {canvas, ctx, resize};
+            };
 
-  <!-- Hidden canvas for compositing/export -->
-  <canvas id="cardCanvas" width="1200" height="800" aria-hidden="true"></canvas>
+            // Star Field with TypedArrays (Maximum Performance)
+            const StarField = (() => {
+                const stars = store.getState().particles;
+                const starCount = 100;
+                
+                // Initialize stars
+                for (let i = 0, len = starCount * 5; i < len; i += 5) {
+                    stars[i] = Math.random();           // x
+                    stars[i + 1] = Math.random();       // y  
+                    stars[i + 2] = Math.random() * 2 + 0.5; // size
+                    stars[i + 3] = Math.random() * 0.0005 + 0.0001; // speed
+                    stars[i + 4] = Math.random() * Math.PI * 2; // phase
+                }
+                
+                const render = (ctx, width, height, time) => {
+                    // Clear with gradient
+                    const gradient = ctx.createLinearGradient(0, 0, 0, height);
+                    gradient.addColorStop(0, 'rgba(0, 4, 40, 0.1)');
+                    gradient.addColorStop(1, 'rgba(0, 78, 146, 0.1)');
+                    ctx.fillStyle = gradient;
+                    ctx.fillRect(0, 0, width, height);
+                    
+                    // Render stars with tight loop
+                    ctx.fillStyle = 'white';
+                    for (let i = 0, len = starCount * 5; i < len; i += 5) {
+                        const x = stars[i] * width;
+                        const y = stars[i + 1] * height;
+                        const size = stars[i + 2];
+                        const brightness = (Math.sin(stars[i + 4] + time * stars[i + 3]) + 1) * 0.5;
+                        
+                        ctx.globalAlpha = brightness * 0.8 + 0.2;
+                        ctx.beginPath();
+                        ctx.arc(x, y, size, 0, Math.PI * 2);
+                        ctx.fill();
+                        
+                        // Update phase
+                        stars[i + 4] += stars[i + 3];
+                    }
+                    ctx.globalAlpha = 1;
+                };
+                
+                return {render};
+            })();
 
-  <script>
-  // Model: GPT-5 Thinking mini (implementation notes)
-  // Single-file, functional patterns, TypedArray for stars, interactive constellation,
-  // SVG generative placeholders, one-click export (SVG->PNG via canvas), cleanup & throttling.
+            // Generative Art System
+            const GenerativeArt = (() => {
+                const generatePattern = (ctx, width, height, seed) => {
+                    // Seeded random for reproducibility
+                    const random = (() => {
+                        let s = seed;
+                        return () => {
+                            s = (s * 9301 + 49297) % 233280;
+                            return s / 233280;
+                        };
+                    })();
+                    
+                    // Create organic shapes
+                    ctx.save();
+                    for (let i = 0; i < 5; i++) {
+                        const x = random() * width;
+                        const y = random() * height;
+                        const radius = random() * 50 + 20;
+                        
+                        const gradient = ctx.createRadialGradient(x, y, 0, x, y, radius);
+                        gradient.addColorStop(0, `rgba(183, 148, 246, ${random() * 0.3})`);
+                        gradient.addColorStop(1, 'transparent');
+                        
+                        ctx.fillStyle = gradient;
+                        ctx.beginPath();
+                        ctx.arc(x, y, radius, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                    ctx.restore();
+                };
+                
+                return {generatePattern};
+            })();
 
-  (function(){
-    'use strict';
+            // Audio Visualizer with Precise Timing
+            const AudioVisualizer = (() => {
+                let animationFrame;
+                
+                const animate = () => {
+                    const bars = document.querySelectorAll('.viz-bar');
+                    const time = Date.now() * 0.001;
+                    
+                    bars.forEach((bar, i) => {
+                        const height = 20 + Math.sin(time * 2 + i * 0.5) * 30;
+                        bar.style.height = `${height}%`;
+                    });
+                    
+                    if (store.getState().isPlaying) {
+                        animationFrame = requestAnimationFrame(animate);
+                    }
+                };
+                
+                const start = () => {
+                    if (!animationFrame) {
+                        animate();
+                    }
+                };
+                
+                const stop = () => {
+                    if (animationFrame) {
+                        cancelAnimationFrame(animationFrame);
+                        animationFrame = null;
+                    }
+                };
+                
+                return {start, stop};
+            })();
 
-    /* ------------------------------
-       Helpers (pure)
-       ------------------------------ */
-    const clamp = (v,a,b) => (v < a ? a : (v > b ? b : v));
-    const now = () => performance.now();
-    const throttle = (fn, wait) => {
-      let last = 0;
-      return function(...args){
-        const t = Date.now();
-        if (t - last >= wait) { last = t; fn.apply(this, args); }
-      };
-    };
+            // Birthday Card Generator
+            const CardGenerator = (() => {
+                const messages = [
+                    "A year older, infinitely more amazing",
+                    "May your journey be filled with stardust",
+                    "You're the constellation I navigate by",
+                    "Today the universe celebrates its masterpiece",
+                    "Another orbit, another year of your light"
+                ];
+                
+                const generate = () => {
+                    const svg = document.getElementById('birthdayCard');
+                    const messageEl = document.getElementById('cardMessage');
+                    const randomMsg = messages[Math.floor(Math.random() * messages.length)];
+                    
+                    if (messageEl) {
+                        messageEl.textContent = randomMsg;
+                        
+                        // Add generative stars
+                        const existingStars = svg.querySelectorAll('.generated-star');
+                        existingStars.forEach(star => star.remove());
+                        
+                        for (let i = 0; i < 20; i++) {
+                            const star = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                            star.setAttribute('cx', Math.random() * 600);
+                            star.setAttribute('cy', Math.random() * 400);
+                            star.setAttribute('r', Math.random() * 2 + 1);
+                            star.setAttribute('fill', '#f0e6ff');
+                            star.setAttribute('opacity', Math.random() * 0.7 + 0.3);
+                            star.classList.add('generated-star');
+                            svg.appendChild(star);
+                        }
+                    }
+                };
+                
+                const download = () => {
+                    const svg = document.getElementById('birthdayCard');
+                    const svgData = new XMLSerializer().serializeToString(svg);
+                    const svgBlob = new Blob([svgData], {type: 'image/svg+xml;charset=utf-8'});
+                    const url = URL.createObjectURL(svgBlob);
+                    
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.download = `ela-birthday-card-${Date.now()}.svg`;
+                    link.click();
+                    
+                    URL.revokeObjectURL(url);
+                };
+                
+                return {generate, download};
+            })();
 
-    /* ------------------------------
-       Audio (encapsulated)
-       ------------------------------ */
-    const AudioPlayer = (() => {
-      const audio = document.getElementById('bgMusic');
-      let playing = false;
-      audio.preload = 'metadata';
-      const play = async () => {
-        try {
-          await audio.play();
-          playing = true;
-          document.getElementById('playToggle').setAttribute('aria-pressed','true');
-        } catch(e) {
-          console.warn('Audio play prevented', e);
-        }
-      };
-      const pause = () => { audio.pause(); playing = false; document.getElementById('playToggle').setAttribute('aria-pressed','false'); };
-      const toggle = async () => playing ? pause() : await play();
-      audio.addEventListener('ended', () => { playing = false; document.getElementById('playToggle').setAttribute('aria-pressed','false'); });
-      return { play, pause, toggle, isPlaying: () => playing, audio };
-    })();
+            // Countdown Timer
+            const Countdown = (() => {
+                let interval;
+                
+                const update = () => {
+                    const now = new Date();
+                    const birthday = store.getState().birthdayDate;
+                    const diff = birthday - now;
+                    
+                    if (diff > 0) {
+                        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                        const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                        const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+                        
+                        document.getElementById('days').textContent = days;
+                        document.getElementById('hours').textContent = hours.toString().padStart(2, '0');
+                        document.getElementById('minutes').textContent = minutes.toString().padStart(2, '0');
+                        document.getElementById('seconds').textContent = seconds.toString().padStart(2, '0');
+                    }
+                };
+                
+                const start = () => {
+                    update();
+                    interval = setInterval(update, 1000);
+                };
+                
+                const stop = () => {
+                    if (interval) {
+                        clearInterval(interval);
+                    }
+                };
+                
+                return {start, stop};
+            })();
 
-    /* ------------------------------
-       Starfield (TypedArray + RAF)
-       - starData: [x,y,size,speed,phase] normalized
-       - constellation: array of selected star indices; interactive lines drawn
-       ------------------------------ */
-    const Starfield = (() => {
-      const canvas = document.getElementById('starCanvas');
-      let ctx = null;
-      let width = 0, height = 0;
-      const STAR_COUNT = 200;
-      const starData = new Float32Array(STAR_COUNT * 5);
-      let rafId = null;
-      let lastTime = 0;
-      const constellation = Object.freeze({ list: [] }); // we'll manage immutable via new objects
+            // Main Render Loop
+            const startRenderLoop = () => {
+                const starSetup = setupCanvas('starCanvas');
+                const genSetup = setupCanvas('generativeCanvas');
+                
+                if (!starSetup || !genSetup) return;
+                
+                let lastTime = 0;
+                const targetFPS = 60;
+                const frameTime = 1000 / targetFPS;
+                
+                const render = (currentTime) => {
+                    requestAnimationFrame(render);
+                    
+                    const deltaTime = currentTime - lastTime;
+                    if (deltaTime < frameTime) return;
+                    
+                    lastTime = currentTime - (deltaTime % frameTime);
+                    
+                    // Render stars
+                    starSetup.ctx.clearRect(0, 0, starSetup.canvas.width, starSetup.canvas.height);
+                    StarField.render(starSetup.ctx, window.innerWidth, window.innerHeight, currentTime * 0.001);
+                    
+                    // Render generative art
+                    if (Math.random() < 0.01) { // Occasionally regenerate
+                        genSetup.ctx.clearRect(0, 0, genSetup.canvas.width, genSetup.canvas.height);
+                        GenerativeArt.generatePattern(genSetup.ctx, window.innerWidth, window.innerHeight, Date.now());
+                    }
+                };
+                
+                requestAnimationFrame(render);
+            };
 
-      const initStars = () => {
-        for (let i=0, o=0; i<STAR_COUNT; ++i, o+=5) {
-          starData[o]   = Math.random();              // x norm
-          starData[o+1] = Math.random();              // y norm
-          starData[o+2] = Math.random()*1.6 + 0.4;    // size
-          starData[o+3] = Math.random()*0.0009 + 0.00012; // speed (phase increment)
-          starData[o+4] = Math.random() * Math.PI * 2; // phase
-        }
-      };
+            // Event Handlers (Throttled)
+            const throttle = (fn, delay) => {
+                let last = 0;
+                return (...args) => {
+                    const now = Date.now();
+                    if (now - last >= delay) {
+                        last = now;
+                        return fn(...args);
+                    }
+                };
+            };
 
-      const resize = () => {
-        const dpr = Math.max(1, window.devicePixelRatio || 1);
-        width = canvas.width = Math.floor(window.innerWidth * dpr);
-        height = canvas.height = Math.floor(window.innerHeight * dpr);
-        canvas.style.width = window.innerWidth + 'px';
-        canvas.style.height = window.innerHeight + 'px';
-        // try to get desynchronized context where available for smoother painting
-        ctx = canvas.getContext('2d', { alpha:true, desynchronized:true }) || canvas.getContext('2d');
-        if (ctx && (dpr !== 1)) ctx.setTransform(dpr,0,0,dpr,0,0);
-      };
+            // Initialize
+            const init = () => {
+                const portal = document.getElementById('portal');
+                const mainContent = document.getElementById('mainContent');
+                const enterBtn = document.getElementById('enterBtn');
+                const bgMusic = document.getElementById('bgMusic');
+                const musicToggle = document.getElementById('musicToggle');
+                const generateBtn = document.getElementById('generateCard');
+                const downloadBtn = document.getElementById('downloadCard');
+                const letterContent = document.getElementById('letterContent');
+                
+                // Entry handler
+                enterBtn.addEventListener('click', async () => {
+                    portal.classList.add('hidden');
+                    mainContent.style.opacity = '1';
+                    
+                    try {
+                        await bgMusic.play();
+                        store.setState(() => ({isPlaying: true}));
+                        AudioVisualizer.start();
+                        musicToggle.setAttribute('aria-pressed', 'true');
+                    } catch (e) {
+                        console.log('Audio autoplay prevented');
+                    }
+                    
+                    startRenderLoop();
+                    Countdown.start();
+                    
+                    // Trigger letter animation
+                    setTimeout(() => {
+                        letterContent.classList.add('visible');
+                    }, 500);
+                });
+                
+                // Music toggle
+                musicToggle.addEventListener('click', () => {
+                    const isPlaying = store.getState().isPlaying;
+                    if (isPlaying) {
+                        bgMusic.pause();
+                        AudioVisualizer.stop();
+                        musicToggle.setAttribute('aria-pressed', 'false');
+                    } else {
+                        bgMusic.play();
+                        AudioVisualizer.start();
+                        musicToggle.setAttribute('aria-pressed', 'true');
+                    }
+                    store.setState(() => ({isPlaying: !isPlaying}));
+                });
+                
+                // Card generator
+                generateBtn.addEventListener('click', CardGenerator.generate);
+                downloadBtn.addEventListener('click', CardGenerator.download);
+                
+                // Mouse tracking
+                document.addEventListener('mousemove', throttle((e) => {
+                    const x = e.clientX / window.innerWidth;
+                    const y = e.clientY / window.innerHeight;
+                    document.documentElement.style.setProperty('--mouse-x', `${x * 100}%`);
+                    document.documentElement.style.setProperty('--mouse-y', `${y * 100}%`);
+                    store.setState(() => ({mouseX: x, mouseY: y}));
+                }, 16));
+                
+                // Dynamic wish updates
+                setInterval(() => {
+                    const wishEl = document.getElementById('dynamicWish');
+                    const currentWish = store.getState().currentWish;
+                    const nextWish = (currentWish + 1) % wishes.length;
+                    
+                    wishEl.style.opacity = '0';
+                    setTimeout(() => {
+                        wishEl.textContent = wishes[nextWish];
+                        wishEl.style.opacity = '1';
+                    }, 500);
+                    
+                    store.setState(() => ({currentWish: nextWish}));
+                }, 5000);
+                
+                // Initial card generation
+                CardGenerator.generate();
+            };
+            
+            // Cleanup on page unload
+            window.addEventListener('beforeunload', () => {
+                Countdown.stop();
+                AudioVisualizer.stop();
+            });
+            
+            return {init};
+        })();
 
-      const draw = (t) => {
-        rafId = requestAnimationFrame(draw);
-        const dt = Math.min(40, t - lastTime) || 16;
-        lastTime = t;
-
-        // background fade
-        ctx.clearRect(0,0, canvas.width, canvas.height);
-        const g = ctx.createLinearGradient(0,0,0,window.innerHeight);
-        g.addColorStop(0, 'rgba(0,4,40,0.25)');
-        g.addColorStop(1, 'rgba(0,6,18,0.65)');
-        ctx.fillStyle = g;
-        ctx.fillRect(0,0, window.innerWidth, window.innerHeight);
-
-        // draw stars (tight loop)
-        for (let i=0, o=0; i<STAR_COUNT; ++i, o+=5) {
-          const x = starData[o] * window.innerWidth;
-          const y = starData[o+1] * window.innerHeight;
-          const size = starData[o+2];
-          const phase = starData[o+4];
-
-          const alpha = (Math.sin(phase) * 0.5 + 0.5) * 0.8 + 0.2;
-          ctx.globalAlpha = alpha;
-          ctx.beginPath();
-          ctx.fillStyle = '#fff';
-          ctx.arc(x, y, size, 0, Math.PI*2);
-          ctx.fill();
-
-          // update phase
-          starData[o+4] = phase + starData[o+3] * dt;
-        }
-        ctx.globalAlpha = 1;
-
-        // draw constellation lines (if any)
-        const cons = getConstellation();
-        if (cons.length > 1) {
-          ctx.beginPath();
-          ctx.lineWidth = 1.4;
-          ctx.strokeStyle = 'rgba(159,122,234,0.85)';
-          for (let i=0;i<cons.length-1;++i){
-            const aIdx = cons[i]*5, bIdx = cons[i+1]*5;
-            ctx.moveTo(starData[aIdx]*window.innerWidth, starData[aIdx+1]*window.innerHeight);
-            ctx.lineTo(starData[bIdx]*window.innerWidth, starData[bIdx+1]*window.innerHeight);
-          }
-          ctx.stroke();
-          // draw small highlighted points
-          for (let i=0;i<cons.length;++i){
-            const idx = cons[i]*5;
-            ctx.beginPath();
-            ctx.fillStyle = '#ffd89b';
-            ctx.arc(starData[idx]*window.innerWidth, starData[idx+1]*window.innerHeight, 3.5, 0, Math.PI*2);
-            ctx.fill();
-          }
-        }
-      };
-
-      // immutable constellation state
-      let _constellation = [];
-      const getConstellation = () => _constellation.slice(); // return copy
-      const toggleNearestStar = (clientX, clientY) => {
-        // find nearest star (tight loop)
-        let bestIdx = -1;
-        let bestD = Infinity;
-        for (let i=0, o=0;i<STAR_COUNT;++i,o+=5){
-          const sx = starData[o]*window.innerWidth;
-          const sy = starData[o+1]*window.innerHeight;
-          const dx = sx - clientX, dy = sy - clientY;
-          const d = dx*dx + dy*dy;
-          if (d < bestD){ bestD = d; bestIdx = i; }
-        }
-        // threshold (squared) for click to count
-        const threshold = 1600; // ~40px radius
-        if (bestD > threshold) return; // ignore clicks too far from any star
-
-        // toggle in immutable way
-        if (_constellation.indexOf(bestIdx) >= 0) {
-          _constellation = _constellation.filter(i => i !== bestIdx);
+        // Start when DOM ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', BirthdayExperience.init);
         } else {
-          _constellation = [..._constellation, bestIdx];
+            BirthdayExperience.init();
         }
-        // update screen-reader
-        announce(`${_constellation.length} point(s) in constellation`);
-      };
-
-      const clearConstellation = () => { _constellation = []; announce('Constellation cleared'); };
-
-      const announce = (text) => {
-        const live = document.getElementById('ariaLive');
-        if (live) live.textContent = text;
-      };
-
-      const start = () => { initStars(); resize(); window.addEventListener('resize', resize, { passive:true }); lastTime = now(); rafId = requestAnimationFrame(draw); };
-      const stop = () => { if (rafId) cancelAnimationFrame(rafId); window.removeEventListener('resize', resize); };
-
-      // expose methods
-      return { start, stop, toggleNearestStar, clearConstellation, getConstellation };
-    })();
-
-    /* ------------------------------
-       Export (Generative Birthday Card)
-       - Build an SVG string reproducing the letter + cosmic background
-       - Draw it to a hidden canvas then download PNG
-       ------------------------------ */
-    const CardExporter = (() => {
-      const canvas = document.getElementById('cardCanvas');
-      const ctx = canvas.getContext('2d');
-      // create SVG string function
-      const makeSVG = (textLines, title='Happy Birthday, Ela') => {
-        const w = canvas.width, h = canvas.height;
-        const bgGradient = `linearGradient(0 0 0)`;
-        // Assemble an SVG with same color scheme and nice typography
-        const svg = `
-          <svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">
-            <defs>
-              <linearGradient id="bg" x1="0" x2="0" y1="0" y2="1">
-                <stop offset="0" stop-color="#000428"/>
-                <stop offset="1" stop-color="#004e92"/>
-              </linearGradient>
-              <filter id="grain"><feTurbulence baseFrequency="0.6" numOctaves="3" stitchTiles="stitch"/><feColorMatrix type="saturate" values="0"/></filter>
-              <style>
-                .title { font: 48px Georgia, serif; fill: ${getComputedStyle(document.documentElement).getPropertyValue('--cosmic-text').trim() || '#f0e6ff'}; }
-                .body { font: 20px Georgia, serif; fill: rgba(240,230,255,0.95); }
-              </style>
-            </defs>
-            <rect width="100%" height="100%" fill="url(#bg)"/>
-            <g opacity="0.07"><rect width="100%" height="100%" filter="url(#grain)"/></g>
-            <g transform="translate(80,120)">
-              <text class="title">${escapeXml(title)}</text>
-            </g>
-            <g transform="translate(80,220)">
-              ${textLines.map((ln, i) => `<text class="body" y="${i*36}" x="0">${escapeXml(ln)}</text>`).join('')}
-            </g>
-          </svg>
-        `;
-        return svg;
-      };
-
-      // escape for safety
-      const escapeXml = (str) => str.replace(/[&<>'"]/g, (c)=>({ '&':'&amp;','<':'&lt;','>':'&gt;',"'":'&apos;','"':'&quot;'})[c]);
-
-      const exportPNG = (title, lines) => {
-        const svg = makeSVG(lines, title);
-        const svgBlob = new Blob([svg], { type: 'image/svg+xml;charset=utf-8' });
-        const url = URL.createObjectURL(svgBlob);
-        const img = new Image();
-        img.onload = () => {
-          // draw onto canvas, then produce PNG
-          ctx.clearRect(0,0,canvas.width,canvas.height);
-          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-          URL.revokeObjectURL(url);
-          try {
-            const png = canvas.toDataURL('image/png');
-            // trigger download
-            const a = document.createElement('a');
-            a.href = png;
-            a.download = `Happy-Birthday-Ela.png`;
-            document.body.appendChild(a);
-            a.click();
-            a.remove();
-            announce('Birthday card exported as PNG.');
-          } catch(e) {
-            console.error('Export failed', e);
-            announce('Export failed in this browser.');
-          }
-        };
-        img.onerror = () => { URL.revokeObjectURL(url); announce('Failed to load SVG for export.'); };
-        img.src = url;
-      };
-
-      const announce = (s) => { const live = document.getElementById('ariaLive'); if (live) live.textContent = s; };
-
-      return { exportPNG };
-    })();
-
-    /* ------------------------------
-       Wiring & UX
-       ------------------------------ */
-    function initUI(){
-      const enterPlay = document.getElementById('enterPlay');
-      const enterSilent = document.getElementById('enterSilent');
-      const playToggle = document.getElementById('playToggle');
-      const starCanvas = document.getElementById('starCanvas');
-      const clearConstBtn = document.getElementById('clearConst');
-      const exportBtn = document.getElementById('exportCard');
-
-      // entry handlers (user gesture)
-      enterPlay.addEventListener('click', async () => {
-        document.getElementById('entryOverlay').classList.add('hidden');
-        await AudioPlayer.play();
-      }, { once:true });
-
-      enterSilent.addEventListener('click', () => {
-        document.getElementById('entryOverlay').classList.add('hidden');
-      }, { once:true });
-
-      // play/pause toggle
-      playToggle.addEventListener('click', () => AudioPlayer.toggle(), { passive:true });
-
-      // star canvas click -> constellation toggle
-      starCanvas.addEventListener('click', (e) => {
-        const rect = starCanvas.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
-        Starfield.toggleNearestStar(x, y);
-      }, { passive:true });
-
-      clearConstBtn.addEventListener('click', () => Starfield.clearConstellation(), { passive:true });
-
-      exportBtn.addEventListener('click', () => {
-        // prepare letter lines trimmed and limited for neat card
-        const raw = Array.from(document.querySelectorAll('#letter p')).map(p => p.textContent.trim()).filter(Boolean);
-        // flatten into lines ~40 chars (simple wrap)
-        const lines = [];
-        raw.forEach(par => {
-          const words = par.split(/\s+/);
-          let line = '';
-          for (const w of words){
-            if ((line + ' ' + w).trim().length > 40) { lines.push(line.trim()); line = w; }
-            else { line = (line + ' ' + w).trim(); }
-          }
-          if (line) lines.push(line);
-          // add empty gap between paragraphs
-          lines.push('');
-        });
-        // limit lines to fit canvas
-        const trimmed = lines.slice(0, 18);
-        CardExporter.exportPNG('Happy Birthday, Ela', trimmed);
-      }, { passive:true });
-
-      /* mouse visual parallax -- throttled */
-      const root = document.documentElement;
-      const onMove = throttle((e) => {
-        const x = (e.clientX / window.innerWidth) * 100;
-        const y = (e.clientY / window.innerHeight) * 100;
-        root.style.setProperty('--mouse-x', `${x}%`);
-        root.style.setProperty('--mouse-y', `${y}%`);
-      }, 16);
-      document.addEventListener('mousemove', onMove, { passive:true });
-
-      // keyboard: enter overlay
-      const overlay = document.getElementById('entryOverlay');
-      overlay.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); enterPlay.click(); }
-      });
-
-      // cleanup on pagehide
-      window.addEventListener('pagehide', () => {
-        try { AudioPlayer.pause(); } catch(_) {}
-        Starfield.stop && Starfield.stop();
-      }, { passive:true });
-    }
-
-    /* ------------------------------
-       Init
-       ------------------------------ */
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', () => { Starfield.start(); initUI(); });
-    } else {
-      Starfield.start(); initUI();
-    }
-
-  })();
-  </script>
-
+    </script>
 </body>
 </html>
