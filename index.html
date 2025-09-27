@@ -737,4 +737,257 @@
             // Main Application Controller
             const init = () => {
                 // Initialize all systems
-                const 
+                const particleSystem = new ParticleSystem();
+                const audioViz = new AudioVisualizer();
+                const generativeMusic = new GenerativeMusic();
+                
+                // Get DOM elements
+                const entryOverlay = document.getElementById('entryOverlay');
+                const mainContainer = document.getElementById('mainContainer');
+                const enterBtn = document.getElementById('enterBtn');
+                const bgMusic = document.getElementById('bgMusic');
+                const musicToggle = document.getElementById('musicToggle');
+                const audioVisual = document.getElementById('audioVisual');
+                const letterSection = document.getElementById('letterSection');
+                const micBtn = document.getElementById('micBtn');
+                const clearBtn = document.getElementById('clearConstellation');
+                
+                // Canvas setup
+                const starCanvas = document.getElementById('starCanvas');
+                const auroraCanvas = document.getElementById('auroraCanvas');
+                const constellationCanvas = document.getElementById('constellationCanvas');
+                
+                const resizeCanvases = () => {
+                    [starCanvas, auroraCanvas, constellationCanvas].forEach(canvas => {
+                        canvas.width = window.innerWidth;
+                        canvas.height = window.innerHeight;
+                    });
+                };
+                
+                resizeCanvases();
+                window.addEventListener('resize', resizeCanvases);
+                
+                const starCtx = starCanvas.getContext('2d');
+                const auroraCtx = auroraCanvas.getContext('2d');
+                
+                const constellation = new ConstellationCreator(constellationCanvas);
+                
+                // Star field data
+                const stars = new Float32Array(300 * 5);
+                for (let i = 0; i < 300 * 5; i += 5) {
+                    stars[i] = Math.random();
+                    stars[i + 1] = Math.random();
+                    stars[i + 2] = Math.random() * 2 + 0.5;
+                    stars[i + 3] = Math.random() * 0.0005 + 0.0001;
+                    stars[i + 4] = Math.random() * Math.PI * 2;
+                }
+                
+                // Initialize event listeners (State Machine Pattern)
+                let appReady = false;
+                
+                // Enter button - state transition
+                enterBtn.addEventListener('click', async () => {
+                    if (currentState !== AppState.READY) return;
+                    
+                    currentState = AppState.ENTERING;
+                    entryOverlay.classList.add('hidden');
+                    mainContainer.style.opacity = '1';
+                    
+                    // Initialize audio
+                    await audioViz.init(bgMusic);
+                    generativeMusic.init();
+                    
+                    try {
+                        await bgMusic.play();
+                        store.setState(() => ({ isPlaying: true }));
+                    } catch (e) {
+                        console.log('Audio prevented');
+                    }
+                    
+                    currentState = AppState.ACTIVE;
+                    
+                    // Start animations
+                    setTimeout(() => {
+                        letterSection.classList.add('visible');
+                    }, 500);
+                });
+                
+                // Music toggle
+                musicToggle.addEventListener('click', () => {
+                    if (currentState !== AppState.ACTIVE) return;
+                    
+                    const isPlaying = store.getState().isPlaying;
+                    if (isPlaying) {
+                        bgMusic.pause();
+                    } else {
+                        bgMusic.play();
+                    }
+                    store.setState(() => ({ isPlaying: !isPlaying }));
+                });
+                
+                // Constellation interactions
+                constellationCanvas.addEventListener('click', (e) => {
+                    if (currentState !== AppState.ACTIVE) return;
+                    constellation.addPoint(e.clientX, e.clientY);
+                    generativeMusic.playNote(e.clientX, e.clientY);
+                });
+                
+                clearBtn.addEventListener('click', () => {
+                    constellation.clear();
+                });
+                
+                // Candle interactions
+                document.querySelectorAll('.flame').forEach((flame, i) => {
+                    flame.addEventListener('click', () => {
+                        flame.classList.add('extinguished');
+                        generativeMusic.playChord();
+                    });
+                });
+                
+                // Microphone blow detection
+                micBtn.addEventListener('click', async () => {
+                    try {
+                        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                        const audioContext = new AudioContext();
+                        const source = audioContext.createMediaStreamSource(stream);
+                        const analyser = audioContext.createAnalyser();
+                        analyser.fftSize = 256;
+                        source.connect(analyser);
+                        
+                        const dataArray = new Uint8Array(analyser.frequencyBinCount);
+                        
+                        const checkBlow = () => {
+                            analyser.getByteFrequencyData(dataArray);
+                            const lowFreqSum = dataArray.slice(0, 10).reduce((a, b) => a + b, 0);
+                            
+                            if (lowFreqSum > 1000) {
+                                document.querySelectorAll('.flame').forEach(flame => {
+                                    flame.classList.add('extinguished');
+                                });
+                                generativeMusic.playChord();
+                            } else {
+                                requestAnimationFrame(checkBlow);
+                            }
+                        };
+                        
+                        checkBlow();
+                    } catch (e) {
+                        console.log('Mic access denied');
+                    }
+                });
+                
+                // Mouse tracking
+                document.addEventListener('mousemove', (e) => {
+                    store.setState(() => ({
+                        mouseX: e.clientX / window.innerWidth,
+                        mouseY: e.clientY / window.innerHeight
+                    }));
+                    
+                    document.documentElement.style.setProperty('--mouse-x', `${(e.clientX / window.innerWidth) * 100}%`);
+                    document.documentElement.style.setProperty('--mouse-y', `${(e.clientY / window.innerHeight) * 100}%`);
+                });
+                
+                // Click particles
+                document.addEventListener('click', (e) => {
+                    if (e.target.tagName === 'BUTTON') return;
+                    if (currentState === AppState.ACTIVE) {
+                        particleSystem.spawn(e.clientX, e.clientY, 10);
+                    }
+                });
+                
+                // Morphing text effect
+                const morphText = document.getElementById('morphText');
+                const messages = [
+                    'Happy Birthday',
+                    'Beautiful Soul',
+                    'Cosmic Wonder',
+                    'Infinite Joy',
+                    'Stellar Being'
+                ];
+                let messageIndex = 0;
+                
+                setInterval(() => {
+                    morphText.style.opacity = '0';
+                    setTimeout(() => {
+                        messageIndex = (messageIndex + 1) % messages.length;
+                        morphText.textContent = messages[messageIndex];
+                        morphText.style.opacity = '1';
+                    }, 500);
+                }, 3000);
+                
+                // Main render loop
+                let lastTime = 0;
+                let auroraTime = 0;
+                
+                const render = (currentTime) => {
+                    const deltaTime = currentTime - lastTime;
+                    lastTime = currentTime;
+                    auroraTime += deltaTime * 0.0001;
+                    
+                    const state = store.getState();
+                    
+                    // Clear canvases
+                    starCtx.clearRect(0, 0, starCanvas.width, starCanvas.height);
+                    auroraCtx.clearRect(0, 0, auroraCanvas.width, auroraCanvas.height);
+                    
+                    // Render stars
+                    starCtx.fillStyle = 'white';
+                    for (let i = 0; i < 300 * 5; i += 5) {
+                        const x = stars[i] * starCanvas.width;
+                        const y = stars[i + 1] * starCanvas.height;
+                        const size = stars[i + 2];
+                        const phase = stars[i + 4] + currentTime * stars[i + 3];
+                        
+                        const brightness = Math.sin(phase) * 0.5 + 0.5;
+                        starCtx.globalAlpha = brightness * 0.8 + 0.2;
+                        
+                        starCtx.beginPath();
+                        starCtx.arc(x, y, size, 0, Math.PI * 2);
+                        starCtx.fill();
+                    }
+                    
+                    // Render aurora using Perlin noise
+                    for (let x = 0; x < auroraCanvas.width; x += 10) {
+                        for (let y = 0; y < auroraCanvas.height; y += 10) {
+                            const noise = perlin.noise(x * 0.005, y * 0.005, auroraTime);
+                            if (noise > 0.3) {
+                                const alpha = (noise - 0.3) * 2;
+                                auroraCtx.fillStyle = `hsla(${280 + noise * 60}, 70%, 50%, ${alpha * 0.3})`;
+                                auroraCtx.fillRect(x, y, 10, 10);
+                            }
+                        }
+                    }
+                    
+                    // Update and render particles
+                    particleSystem.update(deltaTime, state.mouseX * window.innerWidth, state.mouseY * window.innerHeight);
+                    particleSystem.render(starCtx);
+                    
+                    // Update constellation
+                    constellation.update(deltaTime);
+                    constellation.render();
+                    
+                    // Update audio visualization
+                    if (state.isPlaying) {
+                        audioViz.renderBars(audioVisual);
+                    }
+                    
+                    requestAnimationFrame(render);
+                };
+                
+                // Start when ready
+                currentState = AppState.READY;
+                requestAnimationFrame(render);
+            };
+            
+            // Initialize when DOM is ready
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', init);
+            } else {
+                init();
+            }
+            
+            return { init };
+        })();
+    </script>
+</body>
+</html>
